@@ -1,4 +1,4 @@
-baseurl = "https://jmbit.de/"
+baseurl = "https://www.jmbit.de/"
 languageCode = "de-de"
 theme = "hugo-theme-terminal"
 paginate = 5
@@ -30,11 +30,11 @@ paginate = 5
       [[languages.en.menu.main]]
         identifier = "about"
         name = "Über mich"
-        url = "/about"
+        url = "/about/"
       [[languages.en.menu.main]]
         identifier = "Expertise"
         name = "Expertise"
-        url = "/expertise"     
+        url = "/expertise/"     
 		[[languages.en.menu.main]]
         identifier = "consulting"
         name = "Consulting"

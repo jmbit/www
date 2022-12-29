@@ -61,7 +61,7 @@ spec:
     email: webmaster@jmbit.de # replace this
     privateKeySecretRef:
       name: letsencrypt-web-prod
-    server: https://acme-staging-v02.api.letsencrypt.org/directory
+    server: https://acme-v02.api.letsencrypt.org/directory
     solvers:
       - http01:
           ingress:
@@ -78,7 +78,7 @@ metadata:
     cert-manager.io/issuer: letsencrypt-web-prod
 spec:
   tls:
-    - secretName: jmbit-web-cert
+    - secretName: jmbit-web-cert-prod
       hosts:
         - www.jmbit.de
         - jmbit.de
