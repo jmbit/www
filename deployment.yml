@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: www-jmbit-de
+  labels:
+    app: nginx-jmbit-www
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx-jmbit-www
+  template:
+    metadata:
+      labels:
+        app: nginx-jmbit-www
+    spec:
+      containers:
+      - name: www-jmbit-de
+        image: localhost/www-jmbit-de
+        ports:
+        - containerPort: 80
+  

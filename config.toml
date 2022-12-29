@@ -1,0 +1,41 @@
+baseurl = "https://jmbit.de/"
+languageCode = "de-de"
+theme = "hugo-theme-terminal"
+paginate = 5
+
+[params]
+  contentTypeName = "posts"
+  themeColor = "blue"
+  showMenuItems = 5
+  fullWidthTheme = true
+  centerTheme = false
+
+[languages]
+  [languages.de]
+    title = "Johannes Bülow IT Consulting"
+    subtitle = "Consulting & Support zu IT-Sicherheit, Linux, Hosting, Entwicklung und mehr"
+    keywords = ""
+    copyright = "Johannes Bülow"
+    menuMore = "Mehr anzeigen"
+    readMore = "Weiterlesen"
+    readOtherPosts = "Weitere Artikel"
+	 owner = "Johannes Bülow"
+
+
+    [languages.en.params.logo]
+      logoText = "JMB IT"
+      logoHomeLink = "/"
+
+    [languages.en.menu]
+      [[languages.en.menu.main]]
+        identifier = "about"
+        name = "Über mich"
+        url = "/about"
+      [[languages.en.menu.main]]
+        identifier = "Expertise"
+        name = "Expertise"
+        url = "/expertise"     
+		[[languages.en.menu.main]]
+        identifier = "consulting"
+        name = "Consulting"
+        url = "/consulting/"
