@@ -7,7 +7,7 @@ metadata:
   labels:
     app: nginx-jmbit-www
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: nginx-jmbit-www
@@ -19,6 +19,7 @@ spec:
       containers:
       - name: www-jmbit-de
         image: docker.io/jmbitci/www-jmbit-de
+        imagePullPolicy: "Always"
         ports:
         - containerPort: 80
 ---
@@ -34,73 +35,4 @@ spec:
     name: tcp
   selector:
     app: nginx-jmbit-www
----
-apiVersion: cert-manager.io/v1
-kind: Issuer
-metadata:
-  name: letsencrypt-web-staging
-  namespace: jmbit-web
-spec:
-  acme:
-    email: webmaster@jmbit.de # replace this
-    privateKeySecretRef:
-      name: letsencrypt-web-staging
-    server: https://acme-staging-v02.api.letsencrypt.org/directory
-    solvers:
-      - http01:
-          ingress:
-            class: traefik
----
-apiVersion: cert-manager.io/v1
-kind: Issuer
-metadata:
-  name: letsencrypt-web-prod
-  namespace: jmbit-web
-spec:
-  acme:
-    email: webmaster@jmbit.de # replace this
-    privateKeySecretRef:
-      name: letsencrypt-web-prod
-    server: https://acme-v02.api.letsencrypt.org/directory
-    solvers:
-      - http01:
-          ingress:
-            class: traefik
-
----
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: jmbit-web-ingress
-  namespace: jmbit-web
-  annotations:
-    kubernetes.io/ingress.class: "traefik"
-    cert-manager.io/issuer: letsencrypt-web-prod
-spec:
-  tls:
-    - secretName: jmbit-web-cert-prod
-      hosts:
-        - www.jmbit.de
-        - jmbit.de
-  rules:
-  - host: www.jmbit.de
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: www-jmbit-de-service
-            port:
-              number: 80
-  - host: jmbit.de
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: www-jmbit-de-service
-            port:
-              number: 80
 
