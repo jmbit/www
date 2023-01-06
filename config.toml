@@ -2,6 +2,7 @@ baseurl = "https://www.jmbit.de/"
 languageCode = "de-de"
 theme = "hugo-theme-terminal"
 paginate = 5
+defaultContentLanguage= "de"
 
 [params]
   contentTypeName = "posts"
@@ -22,20 +23,24 @@ paginate = 5
 	 owner = "Johannes Bülow"
 
 
-    [languages.en.params.logo]
+    [languages.de.params.logo]
       logoText = "JMB IT"
       logoHomeLink = "/"
 
-    [languages.en.menu]
-      [[languages.en.menu.main]]
+    [languages.de.menu]
+      [[languages.de.menu.main]]
         identifier = "about"
         name = "Über mich"
         url = "/about/"
-      [[languages.en.menu.main]]
+      [[languages.de.menu.main]]
         identifier = "Expertise"
         name = "Expertise"
         url = "/expertise/"     
-		[[languages.en.menu.main]]
+		[[languages.de.menu.main]]
         identifier = "consulting"
         name = "Consulting"
         url = "/consulting/"
+		[[languages.de.menu.main]]
+        identifier = "tools"
+        name = "Tools"
+        url = "/tools/"
