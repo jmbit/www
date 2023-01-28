@@ -2,7 +2,6 @@
 title: "Impressum"
 draft: false
 ---
-Impressum
 
 Angaben gemäß § 5 TMG
 
@@ -13,7 +12,7 @@ Bamberger Str. 26
 Kontakt:
 Telefon: 0176-64370805
 
-E-Mail: kontakt@jmbit.de
+E-Mail: kontakt @ jmbit.de
 
 Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV:
 Johannes Bülow

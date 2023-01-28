@@ -44,3 +44,7 @@ defaultContentLanguage= "de"
         identifier = "tools"
         name = "Tools"
         url = "/tools/"
+		[[languages.de.menu.main]]
+        identifier = "blog"
+        name = "Blog"
+        url = "/blog/"
