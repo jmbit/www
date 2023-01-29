@@ -1,7 +1,7 @@
 HEAD=$(shell git rev-parse --short HEAD)
 dev:
 	hugo server -D
-static:
+hugo:
 	hugo
 container:
 	podman build -t docker.io/jmbitci/www-jmbit-de:latest .	
@@ -9,7 +9,7 @@ container:
 publish:
 	podman push docker.io/jmbitci/www-jmbit-de:latest
 	podman push docker.io/jmbitci/www-jmbit-de:$(HEAD)
-nopub: static container
+nopub: hugo container
 	podman run --rm -p8080:80 docker.io/jmbitci/www-jmbit-de
 
 rollout:
@@ -18,6 +18,6 @@ rollout:
 clean:
 	rm 
 
-all: static container publish
+all: hugo container publish
 
 

@@ -1,0 +1,21 @@
+diff --git a/layouts/partials/footer.html b/layouts/partials/footer.html
+index 856ddde..fe25e1a 100644
+--- a/layouts/partials/footer.html
++++ b/layouts/partials/footer.html
+@@ -1,9 +1,13 @@
+ <footer class="footer">
+   <div class="footer__inner">
++    {{ if $.Site.Copyright }}
++      <div class="copyright copyright--user">
++        <span>{{ $.Site.Copyright | safeHTML }}</span>
++    {{ else }}
+       <div class="copyright">
+-        <span>© {{ now.Year }} Johannes Bülow :: Powered by <a href="http://gohugo.io">Hugo</a></span>
+-        <span> :: Theme made by <a href="https://twitter.com/panr">panr</a></span>
+-        <span> :: <a href="/impressum/index.html">Impressum</a></span>
++        <span>© {{ now.Year }} Powered by <a href="http://gohugo.io">Hugo</a></span>
++    {{ end }}
++        <span>:: Theme made by <a href="https://twitter.com/panr">panr</a></span>
+       </div>
+   </div>
+ </footer>
