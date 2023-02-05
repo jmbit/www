@@ -8,5 +8,5 @@ Fachinformatiker Systemintegration
 
 
 
-GPG-Key: [https://www.jmbfountain.de/gpg.asc](https://www.jmbfountain.de/gpg.asc)  
+GPG-Key: [https://www.jmbit.de/gpg.asc.txt](/gpg.asc.txt)  
 Email: kontakt @ jmbit.de
