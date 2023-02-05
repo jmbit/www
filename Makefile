@@ -16,7 +16,7 @@ rollout:
 	kubectl rollout restart deployment www-jmbit-de -n jmbit-web
 
 clean:
-	rm 
+	rm -rf public 
 
 all: hugo container publish
 
