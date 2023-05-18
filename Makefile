@@ -13,7 +13,7 @@ nopub: hugo container
 	podman run --rm -p8080:80 docker.io/jmbitci/www-jmbit-de
 
 rollout:
-	kubectl rollout restart deployment www-jmbit-de -n jmbit-web
+	kubectl --context=jmbit-prod rollout restart deployment www-jmbit-de -n jmbit-web
 
 clean:
 	rm -rf public 
