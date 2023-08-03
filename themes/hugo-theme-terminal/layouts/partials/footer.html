@@ -1,0 +1,35 @@
+<footer class="footer">
+  <div class="footer__inner">
+      <div class="copyright">
+        <span>© {{ now.Year }} Johannes Bülow :: Powered by <a href="http://gohugo.io">Hugo</a></span>
+        <span> :: Theme made by <a href="https://github.com/panr/hugo-theme-terminal">panr</a></span>
+        <span> :: <a href="/impressum/index.html">Impressum</a></span>
+      </div>
+  </div>
+</footer>
+
+{{ $menu := resources.Get "js/menu.js" | js.Build }}
+{{ $prism := resources.Get "js/prism.js" | js.Build }}
+
+{{ $bundle := slice $menu $prism | resources.Concat "bundle.js" | resources.Minify }}
+
+<script type="text/javascript" src="{{ $bundle.RelPermalink }}"></script>
+<script type="text/javascript">
+ document.addEventListener("DOMContentLoaded", function () {
+      /* do not run if browser lacks the antifeature */
+      if (navigator.getEnvironmentIntegrity === undefined)
+                return;
+    	const disclaimerContent = `
+    	    <p>Your browser contains Google DRM. "Web Environment Integrity" is a Google euphemism for a DRM that is designed to prevent ad-blocking. In support of an open web, please install a browser such as <a href="https://www.mozilla.org/en-US/firefox/new/">Firefox</a> that respects your freedom and supports ad blockers.</p>
+    	`;
+
+    	// Get the container element by its ID
+    	const container = document.getElementById("disclaimer-container");
+
+    	// Insert the disclaimer content into the container
+    	container.innerHTML = disclaimerContent;		  
+ }, false);
+</script>
+
+<!-- Extended footer section-->
+{{ partial "extended_footer.html" . }}
