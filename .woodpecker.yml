@@ -1,0 +1,39 @@
+# Build and publish Docker images for multible architectures.
+# 
+# Pushing an image to codeberg as container registry,
+# package owner will be the repo owner.
+#
+# this config also shows usage of yaml aliases and
+# was taken from https://codeberg.org/6543/docker-images/src/commit/37e29c227717c1c07d2776cddcf14725bf952875/.woodpecker/hello.yml
+
+when:
+  branch: main
+
+variables:
+  - &file Dockerfile
+  - &repo docker.io/jmbitci/www-jmbit-de
+
+steps:
+  dryrun:
+    image: klakegg/hugo
+    commands:
+      - hugo --minify
+    when:
+      event: [ pull-request, push]
+
+  publish:
+    image: woodpeckerci/plugin-docker-buildx
+    settings:
+      dockerfile: *file
+      platforms: linux/arm64/v8,linux/amd64
+      repo: *repo
+      registry: docker.io
+      tags: 
+        - latest
+        - ${CI_COMMIT_SHA}
+      username: jmbitci
+      password:
+        from_secret: dockerhub_token
+    when:
+      event: push
+

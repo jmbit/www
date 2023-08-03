@@ -1,0 +1,6 @@
+Contact: mailto:security@jmbit.de
+Expires: 2024-06-30T21:59:00.000Z
+Encryption: https://www.jmbit.de/gpg.asc.txt
+Preferred-Languages: en,de
+Canonical: https://www.jmbit.de/security.txt
+
