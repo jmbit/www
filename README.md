@@ -1,4 +1,5 @@
 # JMBIT Website
+[![status-badge](https://ci.jmbit.de/api/badges/1/status.svg)](https://ci.jmbit.de/repos/1)
 
 This is the Sourcecode for my Website [www.jmbit.de](https://www.jmbit.de)
 It is created using [Hugo](https://gohugo.io/) using the MIT-Licenced [Terminal
