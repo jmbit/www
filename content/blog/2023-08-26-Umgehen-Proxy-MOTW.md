@@ -12,14 +12,14 @@ einfach. Am besten lässt es sich an einem Beispiel verstehen:
 
 ## 1. Stufe - Seltsame E-Mail
 Der Benutzer hat diese Mail bekommen:
-[![E-Mail mit HTML anhang](/img/blog/2023-08-28-email.png)]
+![E-Mail mit HTML anhang](/img/blog/2023-08-28-email.png)
 Die meisten Benutzer werden diesen Anhang vermutlich öffnen, da sie nichts verwerfliches daran sehen.
 
 ## 2.Stufe - Download der Datei aus dem Browser
 Das öffnen der Datei führt dann zu dieser Seite:
-[!["Secure File" Portal](/img/blog/2023-08-28-securefileportal.png)
+!["Secure File" Portal](/img/blog/2023-08-28-securefileportal.png)
 In diesem Beispiel ist die HTML-Seite bewusst sehr einfach gehalten und nicht obfuscated oder anderweitig 
-odifiziert. Auf dieser Seite könnten ggf. auch Instruktionen zum weiteren Verfahren sein. 
+modifiziert. Auf dieser Seite könnten ggf. auch Instruktionen zum weiteren Verfahren sein. 
 
 ## 3.a Stufe - Entblocken
 Wenn das Attachment auf einem Windows-Computer geöffnet wurde und ein Microsoft Office-Dokument ist, muss - je nach 
@@ -31,7 +31,7 @@ ausführbar sein soll.
 
 ## 3.b - Dateien sind lokal auf dem Computer
 Bei Dateitypen, die keiner so starken Absicherung unterliegen, oder bei Systemen, die dieses Prinzip der Absicherung
-nicht nutzen, steht die Datei im vollen Umfang zur verfügung. Wird der Benutzer jetzt dazu angeleitet, die Warnung
+nicht nutzen, steht die Datei im vollen Umfang zur Verfügung. Wird der Benutzer jetzt dazu angeleitet, die Warnung
 gegen das Ausführen von aus dem Internet heruntergeladenen Dateien zu ignorieren (oder diese wird umgangen), kann
 Schadcode ausgeführt werden. Da die Datei auf dem Rechner selbst generiert wird und nicht aus dem Internet kommt,
 greifen auch viele Antivirus/EDR-Tools nicht unbedingt ein.
@@ -41,10 +41,10 @@ Nachdem die Malware an den Netzwerk - und manchen Endpoint - angekommen ist und 
 ausgeführt wurde, kann der Computer übernommen werden und sich weiter im Netzwerk verbreitet werden.
 
 ## Wie funktioniert es?
-Web- und Emailfilter (Proxy, Gateway, File inspection etc) führen in der Regel keine dynamische Analyse von Dateien
+Web- und Emailfilter (Proxy, Gateway, File inspection etc.) führen in der Regel keine dynamische Analyse von Dateien
 (e-Mail-Anhängen, heruntergeladene Dateien o.ä.) durch. Daher ist es möglich, Dateien in einem eigentlich harmlosen 
 und auch oft verwendeten Dateiformat (z.B. HTML) an diesen Sicherheitsmaßnahmen vorbeizuschleusen.
-Beispieldateien finden sich [Hier](https://cloud.jmbit.de/s/AJ6wW32dc5qfGd6), das Projekt zur erstellung von solchen
+Beispieldateien finden sich [Hier](https://cloud.jmbit.de/s/AJ6wW32dc5qfGd6), das Projekt zur Erstellung von solchen
 Dateien findet sich [Hier](https://codeberg.org/jmbit/trojantool)
 
 ## Was kann man dagegen tun?
