@@ -56,4 +56,4 @@ in der Konsole, oder ist anderweitig indiziert (z.B. $/# als teil des Prompt etc
 
 
 
-< vim: set wrap linebreak textwidth=120 cc=120 : -->
+<!-- vim: set wrap linebreak textwidth=120 cc=120 : -->
