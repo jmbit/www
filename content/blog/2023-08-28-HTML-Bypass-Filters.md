@@ -54,6 +54,13 @@ irgendeiner Form auftauchen. Das klassische Beispiel ist das Command `whoami` un
 hat sehr selten Bedarf daran, anzuzeigen, welcher User er gerade ist. normalerweise steht dieser als teil des Prompt
 in der Konsole, oder ist anderweitig indiziert (z.B. $/# als teil des Prompt etc). 
 
+----
+## Weitere Informationen
+Kurz nachdem ich diesen Blogpost veröffentlicht habe, wurde von DFIR ein Report über dieses Verfahren "in der freien
+Wildbahn" gepostet: [HTML Smuggling Leads to Domain Wide
+Ransomware](https://thedfirreport.com/2023/08/28/html-smuggling-leads-to-domain-wide-ransomware/)
+
+MITRE-Seite zu diesem Verfahren:  [HTML Smuggling](https://attack.mitre.org/techniques/T1027/006/) 
 
 
 <!-- vim: set wrap linebreak textwidth=120 cc=120 : -->
