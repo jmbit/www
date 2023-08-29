@@ -1,5 +1,5 @@
 ---
-title: "Umgehen von Proxy und Dateibasierten Schutzmechanismen"
+title: "Umgehen von Content Filtering, Proxies und Antivirus mit HTML Dateien"
 date: 2023-08-28
 draft: false
 ---
