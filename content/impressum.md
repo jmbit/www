@@ -13,19 +13,16 @@ Die Website ist unter GPLv2 Lizenziert, der Inhalt ist zusätzlich auch unter CC
 
 Johannes Bülow
 Bamberger Str. 26
-74078 Heilbronn
-
-Kontakt:
-Telefon: 0176-64370805
-
+74078 Heilbronn  
+**Kontakt:**   
 E-Mail: kontakt @ jmbit.de
-
+  
 Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV:
 Johannes Bülow
 Bamberger Str. 26
 74078 Heilbronn
 
-Haftungsausschluss:
+**Haftungsausschluss:**  
 
 Haftung für Inhalte
 
