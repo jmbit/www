@@ -4,8 +4,6 @@ draft: false
 ---
 ## Source Code
 Die Website ist unter GPLv2 Lizenziert, der Inhalt ist zusätzlich auch unter CC BY 4.0 verfügbar. 
-[![Get it on Codeberg Neon (Unofficial)](/img/get-it-on-codeberg.svg)](https://codeberg.org/jmbit/www-jmbit-de)
-
 
 
 
