@@ -55,4 +55,10 @@ Ansonsten kenne ich auch SuSE Linux, Ubuntu, RHEL und darauf basierende Distribu
 **Automatisierung / Infrastructure as Code**  
 Zur Verwaltung von Server setze ich primär Ansible ein, durfte aber auch Erfahrungen mit Puppet sammeln. Auf meiner Codeberg-Seite finden sich ein paar Beispiels-Playbooks für Ansible.
 
+## Softwareentwicklung
+Hauptsächlich verwende ich mittlerweile die Skript- bzw. Programmiersprachen, Python, Shell und Go, habe in der
+Vergangenheit allerdings viel in Java gearbeitet. Für Microcontroller verwende ich C bzw C++, in der Entwicklung und vor
+allem dem Debugging von Anwendungen in Perl, PHP und Javascript habe ich ebenfalls Erfahrungen.
+[MEHR](/expertise/entwicklung)
+
 <!-- vim: set wrap linebreak textwidth=120 cc=120 spell spelllang=de,en : -->
