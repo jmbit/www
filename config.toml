@@ -13,15 +13,15 @@ defaultContentLanguage= "de"
 
 [languages]
   [languages.de]
-    title = "Johannes Bülow IT Consulting"
-    subtitle = "Consulting & Support zu IT-Sicherheit, Linux, Hosting, Entwicklung und mehr"
-    keywords = ""
-    copyright = "Johannes Bülow"
-    menuMore = "Mehr anzeigen"
-    readMore = "Weiterlesen"
-    readOtherPosts = "Weitere Artikel"
-	 owner = "Johannes Bülow"
-
+	 [languages.de.params]
+      title = "Johannes Bülow IT Consulting"
+      subtitle = "Consulting & Support zu IT-Sicherheit, Linux, Hosting, Entwicklung und mehr"
+      keywords = ""
+      copyright = "Johannes Bülow"
+      menuMore = "Mehr anzeigen"
+      readMore = "Weiterlesen"
+      readOtherPosts = "Weitere Artikel"
+  	   owner = "Johannes Bülow"
 
     [languages.de.params.logo]
       logoText = "JMB IT"
