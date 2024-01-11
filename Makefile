@@ -1,22 +1,26 @@
 HEAD=$(shell git rev-parse --short HEAD)
+CTNAME:=git.jmbit.de/jmb/www-jmbit-de
+
+all: hugo container
+
 dev:
 	hugo server -D
+
 hugo:
-	hugo
+	hugo --minify
+
+webserver:
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o app .
+
 container:
-	podman build -t docker.io/jmbitci/www-jmbit-de:latest -t docker.io/jmbitci/www-jmbit-de:$(HEAD) .	
-publish:
-	podman push docker.io/jmbitci/www-jmbit-de:latest --all-tags
+	podman build -t $(CTNAME):latest -t $(CTNAME):$(HEAD) .	
 
-nopub: hugo container
-	podman run --rm -p8080:80 docker.io/jmbitci/www-jmbit-de
+nopub: hugo webserver container
+	podman run --rm -p8080:80 $(CTNAME)
 
-#rollout:
-#	kubectl --context=jmbit-prod rollout restart deployment www-jmbit-de -n jmbit-web
+run:
+	podman run --rm -p8080:80 $(CTNAME)
 
 clean:
 	rm -rf public 
-
-all: hugo container publish
-
 

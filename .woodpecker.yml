@@ -1,11 +1,3 @@
-# Build and publish Docker images for multible architectures.
-# 
-# Pushing an image to codeberg as container registry,
-# package owner will be the repo owner.
-#
-# this config also shows usage of yaml aliases and
-# was taken from https://codeberg.org/6543/docker-images/src/commit/37e29c227717c1c07d2776cddcf14725bf952875/.woodpecker/hello.yml
-
 when:
   branch: main
 
@@ -14,10 +6,18 @@ variables:
   - &repo git.jmbit.de/${CI_REPO_OWNER}/${CI_REPO_NAME}
 
 steps:
-  dryrun:
+  hugo:
     image: git.jmbit.de/jmb/docker-hugo
     commands:
       - hugo --minify
+    when:
+      event: [ pull-request, push]
+
+  webserver:
+    image: golang:alpine
+    commands:
+      - go mod download && go mod verify
+      - CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -buildvcs=true -o app .
     when:
       event: [ pull-request, push]
 
