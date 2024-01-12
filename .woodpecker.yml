@@ -13,14 +13,6 @@ steps:
     when:
       event: [ pull-request, push]
 
-  webserver:
-    image: golang:alpine
-    commands:
-      - go mod download && go mod verify
-      - CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -buildvcs=true -o app .
-    when:
-      event: [ pull-request, push]
-
   publish:
     image: woodpeckerci/plugin-docker-buildx
     settings:

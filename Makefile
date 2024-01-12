@@ -15,9 +15,6 @@ webserver:
 container:
 	podman build -t $(CTNAME):latest -t $(CTNAME):$(HEAD) .	
 
-nopub: hugo webserver container
-	podman run --rm -p8080:80 $(CTNAME)
-
 run:
 	podman run --rm -p8080:80 $(CTNAME)
 
