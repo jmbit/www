@@ -16,7 +16,7 @@ defaultContentLanguage= "de"
 	 [languages.de.params]
       title = "Johannes Bülow IT Consulting"
       subtitle = "Consulting & Support zu IT-Sicherheit, Linux, Hosting, Entwicklung und mehr"
-      keywords = ""
+      keywords = "linux, it, consulting, security, hosting, development, jmbit, johannes bülow"
       copyright = "Johannes Bülow"
       menuMore = "Mehr anzeigen"
       readMore = "Weiterlesen"
