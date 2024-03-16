@@ -10,8 +10,6 @@ steps:
     image: git.jmbit.de/jmb/docker-hugo
     commands:
       - hugo --minify
-    when:
-      event: [ pull-request, push]
 
   publish:
     image: woodpeckerci/plugin-docker-buildx

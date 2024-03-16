@@ -1,7 +1,7 @@
 ---
 title: "Babelfish für Postgresql - MSSQL-Kompatibilität für Postgres"
 date: 2024-03-16
-draft: true
+draft: false
 ---
 
 [Babelfish](https://babelfishpg.org/) ist ein Projekt, das die Verwendung von Postgresql für Software erlaubt, die
