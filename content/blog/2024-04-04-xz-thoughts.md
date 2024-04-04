@@ -1,7 +1,7 @@
 ---
 title: "Gedanken zu XZ"
 date: 2024-04-04
-draft: true
+draft: false
 ---
 
 Dieser Blogpost ist dazu da, meine Gedanken zu der XZ-Situation zusammenzufassen.
