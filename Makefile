@@ -1,13 +1,13 @@
 HEAD=$(shell git rev-parse --short HEAD)
 CTNAME:=git.jmbit.de/jmb/www-jmbit-de
 
-all: hugo container
+all: hugo webserver
 
 dev:
 	hugo server -D
 
 hugo:
-	hugo --minify
+	hugo
 
 webserver:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o app .
