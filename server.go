@@ -24,7 +24,7 @@ func main() {
 	})
 
 	// Start the HTTP server on port 80
-	err := http.ListenAndServe(":1313", nil)
+	err := http.ListenAndServe(":80", nil)
 	if err != nil {
 		log.Fatal(err)
 	}
