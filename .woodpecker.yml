@@ -1,5 +1,7 @@
 when:
-  branch: main
+  - branch: main
+    event: push
+
 
 variables:
   - &file Dockerfile
