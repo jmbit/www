@@ -1,4 +1,4 @@
-FROM golang:alpine AS builder
+FROM docker.io/library/golang:alpine AS builder
 RUN apk update \
     && apk add --no-cache git \
     && apk add --no-cache --repository=https://dl-cdn.alpinelinux.org/alpine/edge/community hugo
@@ -6,7 +6,7 @@ RUN apk update \
 WORKDIR $GOPATH/src/www-jmbit-de
 COPY . .
 RUN go get -d -v
-RUN hugo --minify
+RUN cd hugo && hugo
 RUN go build -a -installsuffix cgo -ldflags="-w -s" -o /go/bin/www
 
 FROM scratch
