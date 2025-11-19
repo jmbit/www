@@ -1,6 +1,6 @@
 ---
 title: "Lebenslauf"
-date: 2023-09-22
+date: 2025-11-19
 draft: true
 ---
 
@@ -19,6 +19,6 @@ draft: true
 # Berufserfahrung
 - seit 2020 Systemadministrator bei SLK-Kliniken Heilbronn
     - Schwerpunkte auf Linux/Unix und Datenbanken
-- seit 2023 Nebenberufliche Tätigkeit als IT-Berater
+- 2023-2025 Nebenberufliche Tätigkeit als IT-Berater
     - Schwerpunkte IT-Sicherheit und Open Source Software
 

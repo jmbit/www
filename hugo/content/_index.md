@@ -1,6 +1,6 @@
 ---
 title: "Home"
 ---
-# Johannes Bülow: IT Consulting & Service
-**Consulting und Support für IT-Sicherheit, Linux, Hosting, Entwicklung und mehr**  
+# Johannes Bülow: IT Blog
+**Mein Blog zu IT-Sicherheit, Linux, Hosting, Entwicklung und mehr**  
 
