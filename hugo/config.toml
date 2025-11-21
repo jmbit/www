@@ -1,7 +1,7 @@
 baseurl = "https://www.jmbit.de/"
 languageCode = "de-de"
 theme = "terminal"
-paginate = 5
+#paginate = 5
 defaultContentLanguage= "de"
 
 [params]
