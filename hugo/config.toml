@@ -15,7 +15,7 @@ defaultContentLanguage= "de"
   [languages.de]
 	 [languages.de.params]
       title = "Johannes Bülow IT Consulting"
-      subtitle = "Consulting & Support zu IT-Sicherheit, Linux, Hosting, Entwicklung und mehr"
+      subtitle = "IT-Sicherheit, Linux, Hosting, Entwicklung und mehr"
       keywords = "linux, it, consulting, security, hosting, development, jmbit, johannes bülow"
       copyright = "Johannes Bülow"
       menuMore = "Mehr anzeigen"
@@ -32,18 +32,18 @@ defaultContentLanguage= "de"
         identifier = "about"
         name = "Über mich"
         url = "/about/"
-      [[languages.de.menu.main]]
-        identifier = "Expertise"
-        name = "Expertise"
-        url = "/expertise.html"     
-		[[languages.de.menu.main]]
-        identifier = "consulting"
-        name = "Consulting"
-        url = "/consulting/"
-		[[languages.de.menu.main]]
-        identifier = "tools"
-        name = "Tools"
-        url = "/tools/"
+#      [[languages.de.menu.main]]
+#        identifier = "Expertise"
+#        name = "Expertise"
+#        url = "/expertise.html"     
+#		[[languages.de.menu.main]]
+#        identifier = "consulting"
+#        name = "Consulting"
+#        url = "/consulting/"
+#		[[languages.de.menu.main]]
+#        identifier = "tools"
+#        name = "Tools"
+#        url = "/tools/"
 		[[languages.de.menu.main]]
         identifier = "blog"
         name = "Blog"

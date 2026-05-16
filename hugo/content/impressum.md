@@ -7,7 +7,7 @@ Die Website ist unter GPLv2 Lizenziert, der Inhalt ist zusätzlich auch unter CC
 
 
 
-## Angaben gemäß § 5 TMG
+## Angaben gemäß § 5 DDG
 
 Johannes Bülow
 Bamberger Str. 26
