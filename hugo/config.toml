@@ -1,8 +1,9 @@
 baseurl = "https://www.jmbit.de/"
-languageCode = "de-de"
 theme = "terminal"
 #paginate = 5
 defaultContentLanguage= "de"
+Language.Locale = "de-de"
+Author = "Johannes Bülow"
 
 [params]
   contentTypeName = "blog"
