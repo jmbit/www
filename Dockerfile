@@ -1,11 +1,11 @@
 # This is a workaround to get an older version of hugo that still works with 
 # the theme used
-FROM docker.io/library/debian AS hugoer
-RUN APT_FRONTEND=noninteractive apt update -y && apt install hugo -y
-WORKDIR /usr/local/src/www
-COPY . .
-RUN hugo version
-RUN cd hugo && hugo
+#FROM docker.io/library/debian AS hugoer
+#RUN APT_FRONTEND=noninteractive apt update -y && apt install hugo -y
+#WORKDIR /usr/local/src/www
+#COPY . .
+#RUN hugo version
+#RUN cd hugo && hugo
 
 FROM docker.io/library/golang:alpine AS builder
 RUN apk update \
