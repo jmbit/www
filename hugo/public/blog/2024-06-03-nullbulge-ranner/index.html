@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  
+    <title>Nullbulge-Ranner - Compiled Python Malware :: </title>
+  
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Ich bin in den letzten Tagen über Eric Parker auf Malware gestößen, über BeamNG-Mods verteilt wurde.
+Das interessante an dieser Malware ist, dass sie zwar in Python geschrieben ist, aber mithilfe von Pyinstaller1 kompiliert wurde. Dadurch, in Verbindung mit der gewählten Python-Version, ist die Malware effektiv nicht dekompilierbar und nur schwer zu reverse engineeren. Die meisten Informationen über die Malware mussten daher über dynamische Analyse in Sandboxen und VMs gewonnen werden." />
+<meta name="keywords" content="linux, it, consulting, security, hosting, development, jmbit, johannes bülow" />
+
+  <meta name="robots" content="noodp" />
+
+<link rel="canonical" href="https://www.jmbit.de/blog/2024-06-03-nullbulge-ranner/" />
+
+
+  
+
+
+
+
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/buttons.min.2bc533403a27dfe0e93105a92502b42ce4587e2e4a87d9f7d349e51e16e09478.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/code.min.00125962708925857e7b66dbc58391d55be1191a3d0ce2034de8c9cd2c481c36.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/fonts.min.4881f0c525f3ce2a1864fb6e96676396cebe1e6fcef1933e8e1dde7041004fb5.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/footer.min.2e3eb191baee58dd05a9f0104ac1fab0827bca7c64dafe0b2579f934c33a1d69.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/gist.min.a751e8b0abe1ba8bc53ced52a38b19d8950fe78ca29454ea8c2595cf26aad5c0.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/header.min.b6fb4423cf82a9f9d7abc9cd010223fa3d70a6526a3f28f8e17d814c06e18f9e.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/main.min.fe8dc560fccb53a458b0db19ccb7b265764ac46b68596b7e099c6793054dd457.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/menu.min.83637a90d903026bc280d3f82f96ceb06c5fc72b7c1a8d686afb5bbf818a29f7.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/pagination.min.82f6400eae7c7c6dc3c866733c2ec0579e4089608fea69400ff85b3880aa0d3c.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/post.min.fc74ca360273c1d828da3c02b8174eba435607b369d98418ccc6f2243cd4e75d.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/prism.min.9023bbc24533d09e97a51a0a42a5a7bfe4c591ae167c5551fb1d2191d11977c0.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/syntax.min.cc789ed9377260d7949ea4c18781fc58959a89287210fe4edbff44ebfc1511b6.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/terminal.min.dd0bf9c7cacb24c1b0184f52f1869b274e06689557468cc7030ccf632328eb97.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/terms.min.b81791663c3790e738e571cdbf802312390d30e4b1d8dc9d814a5b5454d0ac11.css">
+
+
+<link rel="stylesheet" href="https://www.jmbit.de/terminal.css">
+
+
+
+
+<link rel="shortcut icon" href="https://www.jmbit.de/favicon.png">
+<link rel="apple-touch-icon" href="https://www.jmbit.de/apple-touch-icon.png">
+
+
+<meta name="twitter:card" content="summary" />
+
+
+
+<meta property="og:locale" content="de" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="Nullbulge-Ranner - Compiled Python Malware">
+<meta property="og:description" content="Ich bin in den letzten Tagen über Eric Parker auf Malware gestößen, über BeamNG-Mods verteilt wurde.
+Das interessante an dieser Malware ist, dass sie zwar in Python geschrieben ist, aber mithilfe von Pyinstaller1 kompiliert wurde. Dadurch, in Verbindung mit der gewählten Python-Version, ist die Malware effektiv nicht dekompilierbar und nur schwer zu reverse engineeren. Die meisten Informationen über die Malware mussten daher über dynamische Analyse in Sandboxen und VMs gewonnen werden." />
+<meta property="og:url" content="https://www.jmbit.de/blog/2024-06-03-nullbulge-ranner/" />
+<meta property="og:site_name" content="" />
+
+  <meta property="og:image" content="https://www.jmbit.de/og-image.png">
+
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="627">
+
+
+  <meta property="article:published_time" content="2024-06-03 00:00:00 &#43;0000 UTC" />
+
+
+
+
+
+
+
+
+
+
+
+
+</head>
+<body>
+
+
+<div class="container center">
+
+  <header class="header">
+  <div class="header__inner">
+    <div class="header__logo">
+      <a href="/">
+  <div class="logo">
+    JMB IT
+  </div>
+</a>
+
+    </div>
+    
+      <ul class="menu menu--mobile">
+  <li class="menu__trigger">Menu&nbsp;▾</li>
+  <li>
+    <ul class="menu__dropdown">
+      
+        
+          <li><a href="/blog/">Blog</a></li>
+        
+      
+        
+          <li><a href="/about/">Über mich</a></li>
+        
+      
+      
+    </ul>
+  </li>
+</ul>
+
+    
+    
+  </div>
+  
+    <nav class="navigation-menu">
+  <ul class="navigation-menu__inner menu--desktop">
+    
+      
+        
+          <li><a href="/blog/" >Blog</a></li>
+        
+      
+        
+          <li><a href="/about/" >Über mich</a></li>
+        
+      
+      
+    
+  </ul>
+</nav>
+
+  
+</header>
+
+
+  <div class="content">
+    
+<article class="post">
+  <h1 class="post-title">
+    <a href="https://www.jmbit.de/blog/2024-06-03-nullbulge-ranner/">Nullbulge-Ranner - Compiled Python Malware</a>
+  </h1>
+  <div class="post-meta"><time class="post-date">2024-06-03</time></div>
+
+  
+  
+
+
+  
+
+  <div class="post-content"><div>
+        <p>Ich bin in den letzten Tagen über <a href="https://www.youtube.com/@EricParker">Eric Parker</a> auf Malware gestößen, über BeamNG-Mods verteilt wurde.</p>
+<p>Das interessante an dieser Malware ist, dass sie zwar in Python geschrieben ist, aber mithilfe von Pyinstaller<sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup> kompiliert wurde.
+Dadurch, in Verbindung mit der gewählten Python-Version, ist die Malware effektiv nicht dekompilierbar und nur schwer zu reverse engineeren.
+Die meisten Informationen über die Malware mussten daher über dynamische Analyse in Sandboxen und VMs gewonnen werden.</p>
+<h2 id="oberflächliche-statische-analyse">Oberflächliche statische Analyse<a href="#oberflächliche-statische-analyse" class="hanchor" ariaLabel="Anchor">#</a> </h2>
+<p>Der Erste Schritt war, die Datei &ldquo;statisch&rdquo; zu analysieren, das heißt, sich die Eigenschaften der Malware anzuschauen ohne die Malware selbst auszuführen.
+Dafür habe ich initial die Tools &ldquo;capa&rdquo;<sup id="fnref:2"><a href="#fn:2" class="footnote-ref" role="doc-noteref">2</a></sup>, &ldquo;detect-it-easy&rdquo;<sup id="fnref:3"><a href="#fn:3" class="footnote-ref" role="doc-noteref">3</a></sup> und &ldquo;yara&rdquo;<sup id="fnref:4"><a href="#fn:4" class="footnote-ref" role="doc-noteref">4</a></sup> verwendet.</p>
+<p>Detect-It-Easy gibt uns genauere Informationen über die Datei, vor allem, dass sie mit PyInstaller &ldquo;gepackt&rdquo; wurde.</p>
+<pre tabindex="0"><code>PE64
+    Linker: Microsoft Linker(14.36.33135)
+    Compiler: Microsoft Visual C/C++(19.36.33135)[C]
+    Tool: Visual Studio(2022 version 17.6)
+    Packer: PyInstaller
+</code></pre><p>Capa findet schon sehr viele Informationen:
+
+
+<pre>
+┍━━━━━━━━━━━━━━━━━━━━━━━━┯━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┑
+│ ATT&amp;CK Tactic          │ ATT&amp;CK Technique                                                                   │
+┝━━━━━━━━━━━━━━━━━━━━━━━━┿━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┥
+│ <font color="#06989A">DEFENSE EVASION</font>        │ <font color="#06989A">Obfuscated Files or Information</font> T1027                                              │
+│                        │ <font color="#06989A">Virtualization/Sandbox Evasion</font>::System Checks T1497.001                            │
+├────────────────────────┼────────────────────────────────────────────────────────────────────────────────────┤
+│ <font color="#06989A">DISCOVERY</font>              │ <font color="#06989A">File and Directory Discovery</font> T1083                                                 │
+│                        │ <font color="#06989A">System Information Discovery</font> T1082                                                 │
+├────────────────────────┼────────────────────────────────────────────────────────────────────────────────────┤
+│ <font color="#06989A">EXECUTION</font>              │ <font color="#06989A">Command and Scripting Interpreter</font> T1059                                            │
+│                        │ <font color="#06989A">Shared Modules</font> T1129                                                               │
+┕━━━━━━━━━━━━━━━━━━━━━━━━┷━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┙
+
+┍━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┯━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┑
+│ MBC Objective               │ MBC Behavior                                                                  │
+┝━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┿━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┥
+│ <font color="#06989A">ANTI-BEHAVIORAL ANALYSIS</font>    │ <font color="#06989A">Virtual Machine Detection</font> [B0009]                                             │
+├─────────────────────────────┼───────────────────────────────────────────────────────────────────────────────┤
+│ <font color="#06989A">DATA</font>                        │ <font color="#06989A">Checksum</font>::Adler [C0032.005]                                                   │
+│                             │ <font color="#06989A">Compress Data</font> [C0024]                                                         │
+│                             │ <font color="#06989A">Compression Library</font> [C0060]                                                   │
+│                             │ <font color="#06989A">Encode Data</font>::XOR [C0026.002]                                                  │
+├─────────────────────────────┼───────────────────────────────────────────────────────────────────────────────┤
+│ <font color="#06989A">DEFENSE EVASION</font>             │ <font color="#06989A">Obfuscated Files or Information</font>::Encoding-Standard Algorithm [E1027.m02]      │
+├─────────────────────────────┼───────────────────────────────────────────────────────────────────────────────┤
+│ <font color="#06989A">DISCOVERY</font>                   │ <font color="#06989A">Analysis Tool Discovery</font>::Process detection [B0013.001]                        │
+│                             │ <font color="#06989A">File and Directory Discovery</font> [E1083]                                          │
+│                             │ <font color="#06989A">System Information Discovery</font> [E1082]                                          │
+├─────────────────────────────┼───────────────────────────────────────────────────────────────────────────────┤
+│ <font color="#06989A">EXECUTION</font>                   │ <font color="#06989A">Command and Scripting Interpreter</font> [E1059]                                     │
+├─────────────────────────────┼───────────────────────────────────────────────────────────────────────────────┤
+│ <font color="#06989A">FILE SYSTEM</font>                 │ <font color="#06989A">Create Directory</font> [C0046]                                                      │
+│                             │ <font color="#06989A">Delete Directory</font> [C0048]                                                      │
+│                             │ <font color="#06989A">Delete File</font> [C0047]                                                           │
+│                             │ <font color="#06989A">Read File</font> [C0051]                                                             │
+│                             │ <font color="#06989A">Writes File</font> [C0052]                                                           │
+├─────────────────────────────┼───────────────────────────────────────────────────────────────────────────────┤
+│ <font color="#06989A">OPERATING SYSTEM</font>            │ <font color="#06989A">Environment Variable</font>::Set Variable [C0034.001]                                │
+├─────────────────────────────┼───────────────────────────────────────────────────────────────────────────────┤
+│ <font color="#06989A">PROCESS</font>                     │ <font color="#06989A">Create Process</font> [C0017]                                                        │
+│                             │ <font color="#06989A">Terminate Process</font> [C0018]                                                     │
+┕━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┷━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┙
+
+┍━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┯━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┑
+│ Capability                                           │ Namespace                                            │
+┝━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┿━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┥
+│ <font color="#06989A">reference analysis tools strings</font>                     │ anti-analysis                                        │
+│ <font color="#06989A">reference anti-VM strings targeting Qemu</font>             │ anti-analysis/anti-vm/vm-detection                   │
+│ <font color="#06989A">reference anti-VM strings targeting Xen</font>              │ anti-analysis/anti-vm/vm-detection                   │
+│ <font color="#06989A">compute adler32 checksum</font>                             │ data-manipulation/checksum/adler32                   │
+│ <font color="#06989A">compress data via ZLIB inflate or deflate</font>            │ data-manipulation/compression                        │
+│ <font color="#06989A">encode data using XOR</font> (6 matches)                    │ data-manipulation/encoding/xor                       │
+│ <font color="#06989A">accept command line arguments</font>                        │ host-interaction/cli                                 │
+│ <font color="#06989A">query environment variable</font> (4 matches)               │ host-interaction/environment-variable                │
+│ <font color="#06989A">set environment variable</font> (4 matches)                 │ host-interaction/environment-variable                │
+│ <font color="#06989A">get common file path</font>                                 │ host-interaction/file-system                         │
+│ <font color="#06989A">create directory</font> (2 matches)                         │ host-interaction/file-system/create                  │
+│ <font color="#06989A">delete directory</font>                                     │ host-interaction/file-system/delete                  │
+│ <font color="#06989A">delete file</font>                                          │ host-interaction/file-system/delete                  │
+│ <font color="#06989A">enumerate files on Windows</font>                           │ host-interaction/file-system/files/list              │
+│ <font color="#06989A">get file size</font>                                        │ host-interaction/file-system/meta                    │
+│ <font color="#06989A">read file on Windows</font> (10 matches)                    │ host-interaction/file-system/read                    │
+│ <font color="#06989A">write file on Windows</font> (2 matches)                    │ host-interaction/file-system/write                   │
+│ <font color="#06989A">get disk information</font> (2 matches)                     │ host-interaction/hardware/storage                    │
+│ <font color="#06989A">create process on Windows</font>                            │ host-interaction/process/create                      │
+│ <font color="#06989A">terminate process</font>                                    │ host-interaction/process/terminate                   │
+│ <font color="#06989A">link many functions at runtime</font> (2 matches)           │ linking/runtime-linking                              │
+│ <font color="#06989A">linked against ZLIB</font>                                  │ linking/static/zlib                                  │
+│ <font color="#06989A">parse PE header</font> (3 matches)                          │ load-code/pe                                         │
+│ <font color="#06989A">resolve function by parsing PE exports</font>               │ load-code/pe                                         │
+┕━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┷━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┙
+</pre>
+
+
+
+Auch Yara findet einige Pattern in der Datei:</p>
+<pre tabindex="0"><code>DebuggerException__SetConsoleCtrl
+anti_dbg
+screenshot
+win_token
+win_files_operation
+Big_Numbers1 
+CRC32_poly_Constant 
+CRC32_table 
+MachO_File_pyinstaller 
+IsPE64 
+IsWindowsGUI 
+IsPacked 
+HasOverlay 
+HasDigitalSignature 
+HasDebugData 
+HasRichSignature 
+Microsoft_Visual_Cpp_80 
+Microsoft_Visual_Cpp_80_DLL 
+</code></pre><p>Zusammenfassend können wir aus dieser statischen Analyse also sagen, dass die Malware es versucht, einem die Analyse schwerer zu machen und möglicherweise ein
+RAT ist (kann laut YARA screenshots machen).</p>
+<h2 id="dynamische-analyse-mit-cape">Dynamische Analyse mit CAPE<a href="#dynamische-analyse-mit-cape" class="hanchor" ariaLabel="Anchor">#</a> </h2>
+<p>Eine <a href="https://www.jmbit.de/blog/2023-11-30-capev2-sandbox/">CAPE-Sandbox-Umgebung</a> ist eine gute Möglichkeit, lokal dynamische Analysen von Malware oder potenzieller
+Malware durchzuführen. In diesem Fall enthält die zu analysierende Datei zwar keine sensiblen Daten, sollte das aber der Fall sein, ist es ggf. nicht sinnvoll,
+die Datei auf eine Cloud-Platform hochzuladen.</p>
+<p>Hier fielen vor allem die Anti-Analyse-Funktionen sowie die Requests zu Discord auf. Da die Malware jedoch ohne Verbindung zu Discord relativ inaktiv ist und keine user-interaktion bietet, ist die
+dynamische analyse hier abgesehen von den Informationen über die installation der Software und ihr Verhalten gegenüber Virtualisierung und Debuggern nicht besonders ergibig.</p>
+<p><a href="https://cloud.jmbit.de/s/qLtzrFyjY3TfQmX">REPORT</a></p>
+<h2 id="analyse-des-webtraffic-mithilfe-von-mitmproxy">Analyse des Webtraffic mithilfe von MITMProxy<a href="#analyse-des-webtraffic-mithilfe-von-mitmproxy" class="hanchor" ariaLabel="Anchor">#</a> </h2>
+<p>Um den Webtraffic genauer anzusehen und mitlesen zu können und eventuelle API-Keys abfangen zu können, habe ich die Malware in einer VM gestartet, die über mitmproxy<sup id="fnref:5"><a href="#fn:5" class="footnote-ref" role="doc-noteref">5</a></sup> ins Internet gegangen ist.
+Hier wurde aber lediglich versucht, sich als ein Bot in Discord einzuloggen, der Zugriff wurde jedoch abgelehnt:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-http" data-lang="http"><span style="display:flex;"><span><span style="color:#a6e22e">GET</span> /api/v10/users/@me <span style="color:#66d9ef">HTTP</span><span style="color:#f92672">/</span><span style="color:#ae81ff">1.1</span>
+</span></span><span style="display:flex;"><span>Host<span style="color:#f92672">:</span> <span style="color:#ae81ff">discord.com</span>
+</span></span><span style="display:flex;"><span>User-Agent<span style="color:#f92672">:</span> <span style="color:#ae81ff">DiscordBot (https://github.com/Rapptz/discord.py 2.3.2) Python/3.10 aiohttp/3.9.5</span>
+</span></span><span style="display:flex;"><span>Authorization<span style="color:#f92672">:</span> <span style="color:#ae81ff">Bot &lt;REDACTED&gt;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>HTTP/1.1 401 Unauthorized
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>{&#34;message&#34;: &#34;401: Unauthorized&#34;, &#34;code&#34;: 0}
+</span></span></code></pre></div><h2 id="analyse-des-programmcodes">Analyse des Programmcodes<a href="#analyse-des-programmcodes" class="hanchor" ariaLabel="Anchor">#</a> </h2>
+<p>Nachdem ich der Malware in der Dynamischen Analyse kaum Informationen entlocken konnte, ging es an die statische Analyse. Da Python 3.10 leider zu neu für die meisten Decompiler ist<sup id="fnref:6"><a href="#fn:6" class="footnote-ref" role="doc-noteref">6</a></sup>, musste ich mich mit dem
+Ergebnis eines Disassemblers zufrieden geben. Aus dem Output dieses (Immerhin 21355 Zeilen!) lies sich der Verdacht, dass es sich bei der Malware um eine Version von PySilon handelt, bestätigen.
+Es wurden jedoch einige zusätzliche Funktionen eingefügt, so zum Beispiel Ransomware und die Möglichkeit des Nachladens eines Cryptominers. Ebenfalls bin ich über während der Analyse auf andere Malware der
+gleichen Gruppe gestoßen.</p>
+<p>Die Ransomware-Mitteilung <code>NULLBULGE-RANSOMWARE-NOTE.TXT</code> würde diesen Text enthalten:</p>
+<pre tabindex="0"><code>READ THIS ENTIRELY BEFORE ACTING, IF YOU SHUT DOWN NOW, ALL WILL BE LOST.
+Your computer is now infected with ransomware. Your file are encrypted with a secure algorithm that is impossible to crack.
+By now it has moved from your main drive, and has started encrypting other drives.
+DONT PANIC! IF YOU START LOOKING FOR THE VIRUS, YOU WILL NOT GET ANY FILES ALREADY ENCRYPTED BACK! BUT THEY CAN BE SAVED!
+To recover your files you need a key. This key is generated once your file have been encrypted. To obtain the key, you must purchase it.
+You can do this by sending 100 USD to this monero address:
+45i7kjWZuzJ4PdSbandaaE8S6mQATmneTYEpgsaaCqDmc7foEJDXwxd3ABR8bn6YE4c7hZ2dYEEr1CwG48gAknPL6zUpYyV
+Don&#39;t know how to get monero? Here are some websites:
+https://www.kraken.com/learn/buy-monero-xmr
+https://localmonero.co/?language=en
+https://www.bestchange.com/visa-mastercard-usd-to-monero.html
+Cant get monero and want to pay via giftcards instead? contact the email below.
+Once you have sent the ransom to the monero address you must write an email this this email address: ZeCBMail@proton.me
+In this email you will include your personal ID so we know who you are. Your personal ID is: 
+&lt;ID&gt;
+Payment is flexable, if you want to discuss pricing send an email with your discord username and I will contact you.
+Be warned... pricing can go up too!
+Once you have completeted all of the steps, you will be provided with the key to decrypt your files.
+Don&#39;t know how ransomware works? Read up here:
+https://www.trellix.com/en-us/security-awareness/ransomware/what-is-ransomware.html
+https://www.checkpoint.com/cyber-hub/threat-prevention/ransomware/
+https://www.trendmicro.com/vinfo/us/security/definition/Ransomware
+Note: Messing with the ransomware will simply make your files harder to decrypt. Deleting the virus will make it impossible, as the key can not be generated.
+Good luck
+-NullBulge
+</code></pre><p>Der Crypto-Miner ist XMRIG und mined für den Pool &ldquo;xmrpool.eu&rdquo;.</p>
+<p>Der Bot wird sowohl über Discord-Reactions als auch über direkte Befehle gesteuert. Die Reactions können einfachere Funktionen abbilden, wie z.B. das wipen der Malware vom System.
+Interessanter sind jedoch die &ldquo;richtigen&rdquo; Befehle, z.B.:</p>
+<ul>
+<li>&lsquo;.ss&rsquo; -&gt; Macht einen Screenshot vom Bildschirm des Opfers</li>
+<li>&lsquo;.screenrec&rsquo; -&gt; zeichnet 15 Sekunden den Bildschirm auf</li>
+<li>&lsquo;.join&rsquo; -&gt; Tritt einem Voice Channel bei und überträgt die Aufnahmen des Mikrofons</li>
+<li>&lsquo;.show&rsquo; -&gt; Zeigt informationen, z.B. alle laufenden Prozesse</li>
+<li>&lsquo;.kill&rsquo; -&gt; Beendet einen Prozesse</li>
+<li>&lsquo;.block-input&rsquo; -&gt; Deaktiviert Tastatur- und Mauseingaben</li>
+<li>&lsquo;.break-windows&rsquo; -&gt; Bennent den Boot-Manager um und verhindert damit, dass Windows rebooten kann</li>
+<li>&lsquo;.xmrig&rsquo; -&gt; Führt den Cryptominer aus</li>
+<li>&lsquo;.webcam photo&rsquo; -&gt; Macht ein Bild mit der Webcam</li>
+<li>&lsquo;.encrypt&rsquo; -&gt; Verschlüsselt alle Dateien im angegebenen Verzeichnis</li>
+<li>&lsquo;.cmd&rsquo; -&gt; Führt beliebigen Befehl aus</li>
+<li>&lsquo;.admin&rsquo; -&gt; Kann Funktionen ausführen wie Defender, Taskmanager oder UAC deaktiveren.</li>
+</ul>
+<div class="footnotes" role="doc-endnotes">
+<hr>
+<ol>
+<li id="fn:1">
+<p>Pyinstaller ist Software, die es ermöglicht, in Python geschriebene Programme so zu compilen und bundlen, dass sie auf Systemen ohne Python-Interpreter
+benutzt werden können. Das kann z.B. als PE-File (Windows .exe) oder ELF (Linux/Unix) sein.&#160;<a href="#fnref:1" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:2">
+<p><a href="https://github.com/mandiant/capa">mandiant/capa</a>, ein Tool, das eine Datei analysiert und versucht, deren Fähigkeiten (capabilities) zu erfassen.&#160;<a href="#fnref:2" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:3">
+<p><a href="https://github.com/horsicq/Detect-It-Easy">horsicq/Detect-It-Easy</a> gibt einem die Eigenschaften einer Datei zurück.&#160;<a href="#fnref:3" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:4">
+<p><a href="https://virustotal.github.io/yara/">Yara</a> ist eine Bibliothek zur Analyse von Malware anhand von Pattern/Eigenschaften der Dateien.&#160;<a href="#fnref:4" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:5">
+<p><a href="https://mitmproxy.org/">MITMProxy</a> ist ein Forward-Proxy, der alle Verbindungen die über ihn laufen aufzeichnet&#160;<a href="#fnref:5" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:6">
+<p>Weder <a href="https://github.com/zrax/pycdc">pycdc</a> noch <a href="https://github.com/greyblue9/unpyc37-3.10">unpyc37-3.10</a> konnten den Bytecode decompilen.&#160;<a href="#fnref:6" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+</ol>
+</div>
+
+      </div></div>
+
+  
+    
+<div class="pagination">
+  <div class="pagination__title">
+    <span class="pagination__title-h">Weitere Artikel</span>
+    <hr />
+  </div>
+  <div class="pagination__buttons">
+    
+    
+    
+      <a href="https://www.jmbit.de/blog/2024-04-04-xz-thoughts/" class="button inline next">
+        Gedanken zu XZ
+      </a>
+    
+  </div>
+</div>
+
+
+  
+
+  
+    
+
+  
+</article>
+
+  </div>
+
+  
+    <footer class="footer">
+  <div class="footer__inner">
+    
+      <div class="copyright">
+        <span>© 2026 Johannes Bülow :: Powered by <a href="http://gohugo.io">Hugo</a></span>
+        <span> :: Theme made by <a href="https://twitter.com/panr">panr</a></span>
+        <span> :: <a href="/impressum/index.html">Impressum</a></span>
+    
+      <span>:: <a href="https://github.com/panr/hugo-theme-terminal" target="_blank">Theme</a> made by <a href="https://github.com/panr" target="_blank">panr</a></span>
+      </div>
+  </div>
+</footer>
+
+
+
+
+
+
+<script type="text/javascript" src="/bundle.min.js"></script>
+
+
+
+
+
+  
+</div>
+
+</body>
+</html>

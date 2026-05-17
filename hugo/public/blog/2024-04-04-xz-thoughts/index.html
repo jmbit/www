@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  
+    <title>Gedanken zu XZ :: </title>
+  
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Dieser Blogpost ist dazu da, meine Gedanken zu der XZ-Situation zusammenzufassen.
+1. Die Entdeckung Die Entdeckung der Backdoor in liblzma war einerseits ein purer Glücksgriff, andererseits auch ein Beispiel dafür, warum Open Source so wichtig für die Entdeckung und Analyse von Schwachstellen ist. In diesem Fall war es dem Entdecker - trotz der Tatsache, dass er eigentlich Datenbank-Entwickler ist - in verhältnismäßig kurzer Zeit möglich, die Ursache der &amp;ldquo;langsamen&amp;rdquo; SSH-Logins (800 statt 300 ms) zu ermitteln und zu analysieren." />
+<meta name="keywords" content="linux, it, consulting, security, hosting, development, jmbit, johannes bülow" />
+
+  <meta name="robots" content="noodp" />
+
+<link rel="canonical" href="https://www.jmbit.de/blog/2024-04-04-xz-thoughts/" />
+
+
+  
+
+
+
+
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/buttons.min.2bc533403a27dfe0e93105a92502b42ce4587e2e4a87d9f7d349e51e16e09478.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/code.min.00125962708925857e7b66dbc58391d55be1191a3d0ce2034de8c9cd2c481c36.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/fonts.min.4881f0c525f3ce2a1864fb6e96676396cebe1e6fcef1933e8e1dde7041004fb5.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/footer.min.2e3eb191baee58dd05a9f0104ac1fab0827bca7c64dafe0b2579f934c33a1d69.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/gist.min.a751e8b0abe1ba8bc53ced52a38b19d8950fe78ca29454ea8c2595cf26aad5c0.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/header.min.b6fb4423cf82a9f9d7abc9cd010223fa3d70a6526a3f28f8e17d814c06e18f9e.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/main.min.fe8dc560fccb53a458b0db19ccb7b265764ac46b68596b7e099c6793054dd457.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/menu.min.83637a90d903026bc280d3f82f96ceb06c5fc72b7c1a8d686afb5bbf818a29f7.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/pagination.min.82f6400eae7c7c6dc3c866733c2ec0579e4089608fea69400ff85b3880aa0d3c.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/post.min.fc74ca360273c1d828da3c02b8174eba435607b369d98418ccc6f2243cd4e75d.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/prism.min.9023bbc24533d09e97a51a0a42a5a7bfe4c591ae167c5551fb1d2191d11977c0.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/syntax.min.cc789ed9377260d7949ea4c18781fc58959a89287210fe4edbff44ebfc1511b6.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/terminal.min.dd0bf9c7cacb24c1b0184f52f1869b274e06689557468cc7030ccf632328eb97.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/terms.min.b81791663c3790e738e571cdbf802312390d30e4b1d8dc9d814a5b5454d0ac11.css">
+
+
+<link rel="stylesheet" href="https://www.jmbit.de/terminal.css">
+
+
+
+
+<link rel="shortcut icon" href="https://www.jmbit.de/favicon.png">
+<link rel="apple-touch-icon" href="https://www.jmbit.de/apple-touch-icon.png">
+
+
+<meta name="twitter:card" content="summary" />
+
+
+
+<meta property="og:locale" content="de" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="Gedanken zu XZ">
+<meta property="og:description" content="Dieser Blogpost ist dazu da, meine Gedanken zu der XZ-Situation zusammenzufassen.
+1. Die Entdeckung Die Entdeckung der Backdoor in liblzma war einerseits ein purer Glücksgriff, andererseits auch ein Beispiel dafür, warum Open Source so wichtig für die Entdeckung und Analyse von Schwachstellen ist. In diesem Fall war es dem Entdecker - trotz der Tatsache, dass er eigentlich Datenbank-Entwickler ist - in verhältnismäßig kurzer Zeit möglich, die Ursache der &amp;ldquo;langsamen&amp;rdquo; SSH-Logins (800 statt 300 ms) zu ermitteln und zu analysieren." />
+<meta property="og:url" content="https://www.jmbit.de/blog/2024-04-04-xz-thoughts/" />
+<meta property="og:site_name" content="" />
+
+  <meta property="og:image" content="https://www.jmbit.de/og-image.png">
+
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="627">
+
+
+  <meta property="article:published_time" content="2024-04-04 00:00:00 &#43;0000 UTC" />
+
+
+
+
+
+
+
+
+
+
+
+
+</head>
+<body>
+
+
+<div class="container center">
+
+  <header class="header">
+  <div class="header__inner">
+    <div class="header__logo">
+      <a href="/">
+  <div class="logo">
+    JMB IT
+  </div>
+</a>
+
+    </div>
+    
+      <ul class="menu menu--mobile">
+  <li class="menu__trigger">Menu&nbsp;▾</li>
+  <li>
+    <ul class="menu__dropdown">
+      
+        
+          <li><a href="/blog/">Blog</a></li>
+        
+      
+        
+          <li><a href="/about/">Über mich</a></li>
+        
+      
+      
+    </ul>
+  </li>
+</ul>
+
+    
+    
+  </div>
+  
+    <nav class="navigation-menu">
+  <ul class="navigation-menu__inner menu--desktop">
+    
+      
+        
+          <li><a href="/blog/" >Blog</a></li>
+        
+      
+        
+          <li><a href="/about/" >Über mich</a></li>
+        
+      
+      
+    
+  </ul>
+</nav>
+
+  
+</header>
+
+
+  <div class="content">
+    
+<article class="post">
+  <h1 class="post-title">
+    <a href="https://www.jmbit.de/blog/2024-04-04-xz-thoughts/">Gedanken zu XZ</a>
+  </h1>
+  <div class="post-meta"><time class="post-date">2024-04-04</time></div>
+
+  
+  
+
+
+  
+
+  <div class="post-content"><div>
+        <p>Dieser Blogpost ist dazu da, meine Gedanken zu der XZ-Situation zusammenzufassen.</p>
+<h2 id="1-die-entdeckung">1. Die Entdeckung<a href="#1-die-entdeckung" class="hanchor" ariaLabel="Anchor">#</a> </h2>
+<p>Die <a href="https://www.openwall.com/lists/oss-security/2024/03/29/4">Entdeckung der Backdoor in liblzma</a>
+war einerseits ein purer Glücksgriff, andererseits auch ein Beispiel dafür, warum
+Open Source so wichtig für die Entdeckung und Analyse von Schwachstellen ist. In diesem Fall war es dem Entdecker -
+trotz der Tatsache, dass er eigentlich Datenbank-Entwickler ist - in verhältnismäßig kurzer Zeit möglich, die Ursache
+der &ldquo;langsamen&rdquo; SSH-Logins (800 statt 300 ms) zu ermitteln und zu analysieren. Im Vergleich dazu hatte ich deutlich mehr
+Zeit investiert in die letztlich erfolglose Analyse eines Memory leaks unter Microsoft Windows.</p>
+<h2 id="2-die-potenziellen-auswirkungen">2. Die potenziellen Auswirkungen<a href="#2-die-potenziellen-auswirkungen" class="hanchor" ariaLabel="Anchor">#</a> </h2>
+<p>Wäre die Backdoor erfolgreich verbreitet worden, wäre früher oder später -
+<a href="https://infosec.exchange/@SecureOwl/112181879860988729">abhängig vom Patchzyklus</a> - ein großer Teil der Server im
+Internet verwundbar gewesen:
+<img alt="Shodan zeigt 19 698 358 OpenSSH Server" src="/img/blog/shodan-openssh-2024-04-04.png">
+Der Angreifer hätte ähnlichen Zugriff auf diese Server gehabt wie damals mit Ethernal Blue auf Windows-Server&hellip; Nur
+dass laut Shodan nur etwa 420 000 Windows Server mit offenem SMB-Port im Internet stehen.</p>
+<h2 id="3-analyse">3. Analyse<a href="#3-analyse" class="hanchor" ariaLabel="Anchor">#</a> </h2>
+<p>Die Analyse der Backdoor (abgesehen von dem nicht gerade hilfreichen Takedown durch Github) hat einige interessante
+Informationen zu Tage befördert. Einmal die Tatsache, dass diese Backdoor sehr gut versteckt war, enthalten in einer
+Testfile, mit dem &ldquo;Aktivierungscode&rdquo; nicht in der Versionskontrolle enthalten<sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup>. Ebenso auffällig ist, dass die
+Backdoor/RCE einen bestimmtes SSH-Zertifikat benötigt, um aktiviert zu werden, und die Payload innerhalb dieses
+Zertifikats (genauer, dem CA-Teil) enthalten ist, wo binäre Daten kaum auffallen <sup id="fnref:2"><a href="#fn:2" class="footnote-ref" role="doc-noteref">2</a></sup> . Später ist ebenfalls aufgefallen, dass
+der Name &ldquo;Jia Cheong Tan&rdquo; zwar chinesisch klingt, aber eine Mischung aus Kantonesisch und Mandarin ist<sup id="fnref:3"><a href="#fn:3" class="footnote-ref" role="doc-noteref">3</a></sup>. Aus der
+Analyse der Git commit logs geht ebenfalls heraus, dass die Commits zu UrzeitenSch gemacht wurden, die für China eher
+unüblich sind<sup id="fnref:4"><a href="#fn:4" class="footnote-ref" role="doc-noteref">4</a></sup>. Die Vermutung liegt also nahe, dass die tatsächliche Person (oder Personen?) hinter der Backdoor
+vermutlich eher in Osteuropa oder dem Nahen Osten (UTC+2/3) zu finden ist.</p>
+<h2 id="4-lessons-learned">4. Lessons Learned<a href="#4-lessons-learned" class="hanchor" ariaLabel="Anchor">#</a> </h2>
+<ul>
+<li>Die XZ-Backdoor ist eine seltene Möglichkeit, in die Vorgehensweise und den Code von möglichen staatlichen Akteuren oder
+anderen APTs<sup id="fnref:5"><a href="#fn:5" class="footnote-ref" role="doc-noteref">5</a></sup> hineinsehen zu können und sein Sicherheitsvorgehen dahingehend zu optimieren.</li>
+<li>Interessant ist, dass die Backdoor nicht im eigentlichen Source Code des Git trees enthalten war,
+sondern in binären Testdateien (für deren
+Generierung kein Sourcecode verfügbar war) versteckt war und der Code zur Aktivierung nur im Release-Tarball enthalten
+war, nicht jedoch im Git tree, was in Kombination dafür spricht, dass der Urheber der Sicherheitslücke versucht hat, so
+wenig &ldquo;permanente&rdquo; Spuren wie möglich zu hinterlassen, die von (automatischer) Code-Analyse einfach gefunden worden
+wären.</li>
+<li>Ebenfalls stellt sich die Frage, in wie vielen anderen Projekten (Open Source wie proprietär), ähnliche Angriffe
+versucht wurden und vielleicht sogar erfolgreich waren. In Zukunft werde zumindest ich deutlich mehr Vorsicht gegenüber
+binären Dateien in Source Code walten lassen. Möglich wäre z.B., dass eine Backdoor in einem binary blob Treiber
+enthalten ist, der von einem Hardware-Hersteller veröffentlicht wird. Sollte dieser Treiber statisch (also nicht als
+Kernel Modul) in den Kernel compiliert werden, wäre es möglich, diese Schwachstelle auf Millionen von Geräten zu
+installieren.</li>
+<li>Ähnliches Vorgehen in proprietärer Software (z.B. Microsoft Exchange) dürfte in ähnlicher Weise umsetzbar sein. Das
+Plazieren eines Maulwurfs in einem solchen Entwicklerteam könnte sogar einfacher sein, da das Vertrauen einem anderen
+Mitarbeiter gegenüber deutlich schneller anwächst als einem Fremden gegenüber.<sup id="fnref:6"><a href="#fn:6" class="footnote-ref" role="doc-noteref">6</a></sup></li>
+<li>Mobbing und Burnout können ein echtes Sicherheitsrisiko sein. &ldquo;Jia Tan&rdquo; wäre vermutlich nie in diese Position gekommen,
+wäre der eigentliche Maintainer und Entwickler von xz nicht von Burnout betroffen und effektiv dazu gemobbt worden,
+&ldquo;Jia Tan&rdquo; zum Co-Maintainer und sogar primären Maintainer zu machen.</li>
+</ul>
+<div class="footnotes" role="doc-endnotes">
+<hr>
+<ol>
+<li id="fn:1">
+<p><a href="https://gynvael.coldwind.pl/?id=782">https://gynvael.coldwind.pl/?id=782</a>&#160;<a href="#fnref:1" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:2">
+<p><a href="https://bsky.app/profile/filippo.abyssdomain.expert/post/3kowjkx2njy2b">https://bsky.app/profile/filippo.abyssdomain.expert/post/3kowjkx2njy2b</a>&#160;<a href="#fnref:2" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:3">
+<p><a href="https://boehs.org/node/everything-i-know-about-the-xz-backdoor">https://boehs.org/node/everything-i-know-about-the-xz-backdoor</a>&#160;<a href="#fnref:3" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:4">
+<p><a href="https://rheaeve.substack.com/p/xz-backdoor-times-damned-times-and">https://rheaeve.substack.com/p/xz-backdoor-times-damned-times-and</a>&#160;<a href="#fnref:4" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:5">
+<p><a href="https://en.wikipedia.org/wiki/Advanced_persistent_threat">https://en.wikipedia.org/wiki/Advanced_persistent_threat</a>&#160;<a href="#fnref:5" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:6">
+<p><a href="https://infosec.exchange/@SecureOwl/112181879860988729">https://infosec.exchange/@SecureOwl/112181879860988729</a>&#160;<a href="#fnref:6" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+</ol>
+</div>
+
+      </div></div>
+
+  
+    
+<div class="pagination">
+  <div class="pagination__title">
+    <span class="pagination__title-h">Weitere Artikel</span>
+    <hr />
+  </div>
+  <div class="pagination__buttons">
+    
+      <a href="https://www.jmbit.de/blog/2024-06-03-nullbulge-ranner/" class="button inline prev">
+        Nullbulge-Ranner - Compiled Python Malware
+      </a>
+    
+    
+      ::
+    
+    
+      <a href="https://www.jmbit.de/blog/2024-03-16-babelfish-psql/" class="button inline next">
+        Babelfish für Postgresql - MSSQL-Kompatibilität für Postgres
+      </a>
+    
+  </div>
+</div>
+
+
+  
+
+  
+    
+
+  
+</article>
+
+  </div>
+
+  
+    <footer class="footer">
+  <div class="footer__inner">
+    
+      <div class="copyright">
+        <span>© 2026 Johannes Bülow :: Powered by <a href="http://gohugo.io">Hugo</a></span>
+        <span> :: Theme made by <a href="https://twitter.com/panr">panr</a></span>
+        <span> :: <a href="/impressum/index.html">Impressum</a></span>
+    
+      <span>:: <a href="https://github.com/panr/hugo-theme-terminal" target="_blank">Theme</a> made by <a href="https://github.com/panr" target="_blank">panr</a></span>
+      </div>
+  </div>
+</footer>
+
+
+
+
+
+
+<script type="text/javascript" src="/bundle.min.js"></script>
+
+
+
+
+
+  
+</div>
+
+</body>
+</html>

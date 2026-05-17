@@ -14,7 +14,7 @@ RUN apk update \
 
 WORKDIR $GOPATH/src/www-jmbit-de
 COPY . .
-COPY --from=hugoer /usr/local/src/www/hugo $GOPATH/src/www-jmbit-de/hugo
+#COPY --from=hugoer /usr/local/src/www/hugo $GOPATH/src/www-jmbit-de/hugo
 RUN go get -d -v
 #RUN cd hugo && hugo
 RUN go build -a -installsuffix cgo -ldflags="-w -s" -o /go/bin/www

@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  
+    <title>Babelfish für Postgresql - MSSQL-Kompatibilität für Postgres :: </title>
+  
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Babelfish ist ein Projekt, das die Verwendung von Postgresql für Software erlaubt, die eigentlich für MSSQL (Microsoft SQL Server) geschrieben wurden. Dies erlaubt zum einen das einsparen von Lizenzkosten, die bei MSSQL, insbesondere für hochverfügbare Umgebungen, leicht sehr hoch werden können, zum anderen aber auch, das größere und modernere Postgres-Ökosystem verwenden zu können.
+Was ist Babelfish? Ähnlich wie sein Namensvorbild, ist Babelfish kein migrationstool o.ä., sondern eine Kompatibilitäts/Übersetzungsschicht, vergleichbar etwa mit Wine." />
+<meta name="keywords" content="linux, it, consulting, security, hosting, development, jmbit, johannes bülow" />
+
+  <meta name="robots" content="noodp" />
+
+<link rel="canonical" href="https://www.jmbit.de/blog/2024-03-16-babelfish-psql/" />
+
+
+  
+
+
+
+
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/buttons.min.2bc533403a27dfe0e93105a92502b42ce4587e2e4a87d9f7d349e51e16e09478.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/code.min.00125962708925857e7b66dbc58391d55be1191a3d0ce2034de8c9cd2c481c36.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/fonts.min.4881f0c525f3ce2a1864fb6e96676396cebe1e6fcef1933e8e1dde7041004fb5.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/footer.min.2e3eb191baee58dd05a9f0104ac1fab0827bca7c64dafe0b2579f934c33a1d69.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/gist.min.a751e8b0abe1ba8bc53ced52a38b19d8950fe78ca29454ea8c2595cf26aad5c0.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/header.min.b6fb4423cf82a9f9d7abc9cd010223fa3d70a6526a3f28f8e17d814c06e18f9e.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/main.min.fe8dc560fccb53a458b0db19ccb7b265764ac46b68596b7e099c6793054dd457.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/menu.min.83637a90d903026bc280d3f82f96ceb06c5fc72b7c1a8d686afb5bbf818a29f7.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/pagination.min.82f6400eae7c7c6dc3c866733c2ec0579e4089608fea69400ff85b3880aa0d3c.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/post.min.fc74ca360273c1d828da3c02b8174eba435607b369d98418ccc6f2243cd4e75d.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/prism.min.9023bbc24533d09e97a51a0a42a5a7bfe4c591ae167c5551fb1d2191d11977c0.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/syntax.min.cc789ed9377260d7949ea4c18781fc58959a89287210fe4edbff44ebfc1511b6.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/terminal.min.dd0bf9c7cacb24c1b0184f52f1869b274e06689557468cc7030ccf632328eb97.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/terms.min.b81791663c3790e738e571cdbf802312390d30e4b1d8dc9d814a5b5454d0ac11.css">
+
+
+<link rel="stylesheet" href="https://www.jmbit.de/terminal.css">
+
+
+
+
+<link rel="shortcut icon" href="https://www.jmbit.de/favicon.png">
+<link rel="apple-touch-icon" href="https://www.jmbit.de/apple-touch-icon.png">
+
+
+<meta name="twitter:card" content="summary" />
+
+
+
+<meta property="og:locale" content="de" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="Babelfish für Postgresql - MSSQL-Kompatibilität für Postgres">
+<meta property="og:description" content="Babelfish ist ein Projekt, das die Verwendung von Postgresql für Software erlaubt, die eigentlich für MSSQL (Microsoft SQL Server) geschrieben wurden. Dies erlaubt zum einen das einsparen von Lizenzkosten, die bei MSSQL, insbesondere für hochverfügbare Umgebungen, leicht sehr hoch werden können, zum anderen aber auch, das größere und modernere Postgres-Ökosystem verwenden zu können.
+Was ist Babelfish? Ähnlich wie sein Namensvorbild, ist Babelfish kein migrationstool o.ä., sondern eine Kompatibilitäts/Übersetzungsschicht, vergleichbar etwa mit Wine." />
+<meta property="og:url" content="https://www.jmbit.de/blog/2024-03-16-babelfish-psql/" />
+<meta property="og:site_name" content="" />
+
+  <meta property="og:image" content="https://www.jmbit.de/og-image.png">
+
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="627">
+
+
+  <meta property="article:published_time" content="2024-03-16 00:00:00 &#43;0000 UTC" />
+
+
+
+
+
+
+
+
+
+
+
+
+</head>
+<body>
+
+
+<div class="container center">
+
+  <header class="header">
+  <div class="header__inner">
+    <div class="header__logo">
+      <a href="/">
+  <div class="logo">
+    JMB IT
+  </div>
+</a>
+
+    </div>
+    
+      <ul class="menu menu--mobile">
+  <li class="menu__trigger">Menu&nbsp;▾</li>
+  <li>
+    <ul class="menu__dropdown">
+      
+        
+          <li><a href="/blog/">Blog</a></li>
+        
+      
+        
+          <li><a href="/about/">Über mich</a></li>
+        
+      
+      
+    </ul>
+  </li>
+</ul>
+
+    
+    
+  </div>
+  
+    <nav class="navigation-menu">
+  <ul class="navigation-menu__inner menu--desktop">
+    
+      
+        
+          <li><a href="/blog/" >Blog</a></li>
+        
+      
+        
+          <li><a href="/about/" >Über mich</a></li>
+        
+      
+      
+    
+  </ul>
+</nav>
+
+  
+</header>
+
+
+  <div class="content">
+    
+<article class="post">
+  <h1 class="post-title">
+    <a href="https://www.jmbit.de/blog/2024-03-16-babelfish-psql/">Babelfish für Postgresql - MSSQL-Kompatibilität für Postgres</a>
+  </h1>
+  <div class="post-meta"><time class="post-date">2024-03-16</time></div>
+
+  
+  
+
+
+  
+
+  <div class="post-content"><div>
+        <p><a href="https://babelfishpg.org/">Babelfish</a> ist ein Projekt, das die Verwendung von Postgresql für Software erlaubt, die
+eigentlich für MSSQL (Microsoft SQL Server) geschrieben wurden. Dies erlaubt zum einen das einsparen von Lizenzkosten,
+die bei MSSQL, insbesondere für hochverfügbare Umgebungen, leicht sehr hoch werden können, zum anderen aber auch, das
+größere und modernere Postgres-Ökosystem verwenden zu können.</p>
+<h2 id="was-ist-babelfish">Was ist Babelfish?<a href="#was-ist-babelfish" class="hanchor" ariaLabel="Anchor">#</a> </h2>
+<p>Ähnlich wie sein <a href="https://de.wikipedia.org/wiki/Babelfisch">Namensvorbild</a>, ist Babelfish kein migrationstool o.ä.,
+sondern eine Kompatibilitäts/Übersetzungsschicht, vergleichbar etwa mit <a href="https://www.winehq.org/">Wine</a>. Im Optimalfall
+kann man also eine Applikation, die eine MSSQL-Datenbank benötigt, mit einem Postgres-DB-Server betreiben, ohne die
+Applikation umbauen zu müssen. Das kann einerseits für eine vereinfachte Migration sein, andererseits aber auch für die
+Ablösung bestehender MSSQL-Server durch Postgres-Server.</p>
+<h2 id="was-ist-babelfish-nicht">Was ist Babelfish nicht?<a href="#was-ist-babelfish-nicht" class="hanchor" ariaLabel="Anchor">#</a> </h2>
+<p>Babelfish ist aktuell NICHT 100% MSSQL-Kompatibel. Es fehlen vor allem Funktionalitäten, die mit dem DB-Server selbst zu
+tun haben (bestimmte tabellen in Systemdatenbanken, manche Stored Procedures&hellip;) oder mit dem darunterliegenden OS
+(CLR/Assebly Module). Dadurch ist Babelfish nicht plug&amp;play, sollte die Applikation eher exotische Funktionen verwenden.
+Ebenfalls sollte es nicht als einfaches Drop-In-Replacement gesehen werden.</p>
+<h2 id="wie-finde-ich-heraus-ob-babelfish-für-meine-anwendung-funktioniert">Wie finde ich heraus, ob Babelfish für meine Anwendung funktioniert?<a href="#wie-finde-ich-heraus-ob-babelfish-für-meine-anwendung-funktioniert" class="hanchor" ariaLabel="Anchor">#</a> </h2>
+<p>Es gibt mehrere Ressourcen, mit deren Hilfe es möglich ist, die Kompatibilität mit Babelfish zu testen:</p>
+<ul>
+<li>Dokumentation: Es gibt sowohl von AWS für ihre SAAS-Version
+<a href="https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/babelfish-compatibility.tsql.limitations-unsupported.html">Informationen</a>,
+als auch vom <a href="https://babelfishpg.org/docs/limitations/limitations-of-babelfish/">Babelfish Projekt selbst</a>.
+Letztere tendieren leider dazu, etwas veraltet zu sein.</li>
+<li><a href="https://github.com/babelfish-for-postgresql/babelfish_compass">Babelfish-Compass</a>: Compass ist ein Tool, mit dessen
+Hilfe es möglich ist, die Kompatibilität sowohl von Skripten, als auch Software und bestehender Datenbanken zu
+messen.</li>
+</ul>
+<h2 id="welche-alternativen-gibt-es">Welche Alternativen gibt es?<a href="#welche-alternativen-gibt-es" class="hanchor" ariaLabel="Anchor">#</a> </h2>
+<p>Sollte es nicht möglich sein, eine Applikation von MSSQL auf Babelfish &amp; Postgres zu migrieren, gibt es noch ein paar
+andere Möglichkeiten, die Datenbank zu modernisieren. Seit Version 2019 kann MSSQL auch unter Linux betrieben werden,
+was abgesehen von der Möglichkeit, Windows Lizenzen einzusparen, die Möglichkeit bietet, die Server mit den üblichen
+Verwaltungstools zu verwalten, sowie Dateisysteme und Storage-Backends zu verwenden, die Windows nicht unterstützt.
+Andererseits erlaubt es auch den Betrieb der Datenbank auf einem Kubernetes-Cluster, das dann Skalierung, Resilienz und
+Verwaltung der DB-Engine übernimmt.</p>
+<p>Sollten Sie nach dieser Einleitung weitere Fragen zu Babelfish haben, können Sie mich gerne kontaktieren.</p>
+
+      </div></div>
+
+  
+    
+<div class="pagination">
+  <div class="pagination__title">
+    <span class="pagination__title-h">Weitere Artikel</span>
+    <hr />
+  </div>
+  <div class="pagination__buttons">
+    
+      <a href="https://www.jmbit.de/blog/2024-04-04-xz-thoughts/" class="button inline prev">
+        Gedanken zu XZ
+      </a>
+    
+    
+      ::
+    
+    
+      <a href="https://www.jmbit.de/blog/2023-12-20-cape-part2/" class="button inline next">
+        CAPEv2 Sandbox Teil 2: Einrichtung der VM(s)
+      </a>
+    
+  </div>
+</div>
+
+
+  
+
+  
+    
+
+  
+</article>
+
+  </div>
+
+  
+    <footer class="footer">
+  <div class="footer__inner">
+    
+      <div class="copyright">
+        <span>© 2026 Johannes Bülow :: Powered by <a href="http://gohugo.io">Hugo</a></span>
+        <span> :: Theme made by <a href="https://twitter.com/panr">panr</a></span>
+        <span> :: <a href="/impressum/index.html">Impressum</a></span>
+    
+      <span>:: <a href="https://github.com/panr/hugo-theme-terminal" target="_blank">Theme</a> made by <a href="https://github.com/panr" target="_blank">panr</a></span>
+      </div>
+  </div>
+</footer>
+
+
+
+
+
+
+<script type="text/javascript" src="/bundle.min.js"></script>
+
+
+
+
+
+  
+</div>
+
+</body>
+</html>

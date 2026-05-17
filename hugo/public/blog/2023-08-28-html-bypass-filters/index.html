@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  
+    <title>Umgehen von Content Filtering, Proxies und Antivirus mit HTML Dateien :: </title>
+  
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Einleitung Seit einigen Monaten arbeite ich hin und wieder an diesem Verfahren, das es einem ermöglicht, auch an ansonsten sehr robust konfigurierten Proxies vorbeizukommen, aber auch Endpoint-Basierte Schutzmechanismen zu umgehen, deren primäre verteidigung die Quelle eines Dateidownloads ist. Der grundsätzlich Ablauf des Verfahrens ist relativ einfach. Am besten lässt es sich an einem Beispiel verstehen:
+1. Stufe - Seltsame E-Mail Der Benutzer hat diese Mail bekommen: Die meisten Benutzer werden diesen Anhang vermutlich öffnen, da sie nichts verwerfliches daran sehen." />
+<meta name="keywords" content="linux, it, consulting, security, hosting, development, jmbit, johannes bülow" />
+
+  <meta name="robots" content="noodp" />
+
+<link rel="canonical" href="https://www.jmbit.de/blog/2023-08-28-html-bypass-filters/" />
+
+
+  
+
+
+
+
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/buttons.min.2bc533403a27dfe0e93105a92502b42ce4587e2e4a87d9f7d349e51e16e09478.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/code.min.00125962708925857e7b66dbc58391d55be1191a3d0ce2034de8c9cd2c481c36.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/fonts.min.4881f0c525f3ce2a1864fb6e96676396cebe1e6fcef1933e8e1dde7041004fb5.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/footer.min.2e3eb191baee58dd05a9f0104ac1fab0827bca7c64dafe0b2579f934c33a1d69.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/gist.min.a751e8b0abe1ba8bc53ced52a38b19d8950fe78ca29454ea8c2595cf26aad5c0.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/header.min.b6fb4423cf82a9f9d7abc9cd010223fa3d70a6526a3f28f8e17d814c06e18f9e.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/main.min.fe8dc560fccb53a458b0db19ccb7b265764ac46b68596b7e099c6793054dd457.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/menu.min.83637a90d903026bc280d3f82f96ceb06c5fc72b7c1a8d686afb5bbf818a29f7.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/pagination.min.82f6400eae7c7c6dc3c866733c2ec0579e4089608fea69400ff85b3880aa0d3c.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/post.min.fc74ca360273c1d828da3c02b8174eba435607b369d98418ccc6f2243cd4e75d.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/prism.min.9023bbc24533d09e97a51a0a42a5a7bfe4c591ae167c5551fb1d2191d11977c0.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/syntax.min.cc789ed9377260d7949ea4c18781fc58959a89287210fe4edbff44ebfc1511b6.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/terminal.min.dd0bf9c7cacb24c1b0184f52f1869b274e06689557468cc7030ccf632328eb97.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/terms.min.b81791663c3790e738e571cdbf802312390d30e4b1d8dc9d814a5b5454d0ac11.css">
+
+
+<link rel="stylesheet" href="https://www.jmbit.de/terminal.css">
+
+
+
+
+<link rel="shortcut icon" href="https://www.jmbit.de/favicon.png">
+<link rel="apple-touch-icon" href="https://www.jmbit.de/apple-touch-icon.png">
+
+
+<meta name="twitter:card" content="summary" />
+
+
+
+<meta property="og:locale" content="de" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="Umgehen von Content Filtering, Proxies und Antivirus mit HTML Dateien">
+<meta property="og:description" content="Einleitung Seit einigen Monaten arbeite ich hin und wieder an diesem Verfahren, das es einem ermöglicht, auch an ansonsten sehr robust konfigurierten Proxies vorbeizukommen, aber auch Endpoint-Basierte Schutzmechanismen zu umgehen, deren primäre verteidigung die Quelle eines Dateidownloads ist. Der grundsätzlich Ablauf des Verfahrens ist relativ einfach. Am besten lässt es sich an einem Beispiel verstehen:
+1. Stufe - Seltsame E-Mail Der Benutzer hat diese Mail bekommen: Die meisten Benutzer werden diesen Anhang vermutlich öffnen, da sie nichts verwerfliches daran sehen." />
+<meta property="og:url" content="https://www.jmbit.de/blog/2023-08-28-html-bypass-filters/" />
+<meta property="og:site_name" content="" />
+
+  <meta property="og:image" content="https://www.jmbit.de/og-image.png">
+
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="627">
+
+
+  <meta property="article:published_time" content="2023-08-28 00:00:00 &#43;0000 UTC" />
+
+
+
+
+
+
+
+
+
+
+
+
+</head>
+<body>
+
+
+<div class="container center">
+
+  <header class="header">
+  <div class="header__inner">
+    <div class="header__logo">
+      <a href="/">
+  <div class="logo">
+    JMB IT
+  </div>
+</a>
+
+    </div>
+    
+      <ul class="menu menu--mobile">
+  <li class="menu__trigger">Menu&nbsp;▾</li>
+  <li>
+    <ul class="menu__dropdown">
+      
+        
+          <li><a href="/blog/">Blog</a></li>
+        
+      
+        
+          <li><a href="/about/">Über mich</a></li>
+        
+      
+      
+    </ul>
+  </li>
+</ul>
+
+    
+    
+  </div>
+  
+    <nav class="navigation-menu">
+  <ul class="navigation-menu__inner menu--desktop">
+    
+      
+        
+          <li><a href="/blog/" >Blog</a></li>
+        
+      
+        
+          <li><a href="/about/" >Über mich</a></li>
+        
+      
+      
+    
+  </ul>
+</nav>
+
+  
+</header>
+
+
+  <div class="content">
+    
+<article class="post">
+  <h1 class="post-title">
+    <a href="https://www.jmbit.de/blog/2023-08-28-html-bypass-filters/">Umgehen von Content Filtering, Proxies und Antivirus mit HTML Dateien</a>
+  </h1>
+  <div class="post-meta"><time class="post-date">2023-08-28</time></div>
+
+  
+  
+
+
+  
+
+  <div class="post-content"><div>
+        <h2 id="einleitung">Einleitung<a href="#einleitung" class="hanchor" ariaLabel="Anchor">#</a> </h2>
+<p>Seit einigen Monaten arbeite ich hin und wieder an diesem Verfahren, das es einem ermöglicht, auch an ansonsten
+sehr robust konfigurierten Proxies vorbeizukommen, aber auch Endpoint-Basierte Schutzmechanismen zu umgehen, deren
+primäre verteidigung die Quelle eines Dateidownloads ist. Der grundsätzlich Ablauf des Verfahrens ist relativ
+einfach. Am besten lässt es sich an einem Beispiel verstehen:</p>
+<h2 id="1-stufe---seltsame-e-mail">1. Stufe - Seltsame E-Mail<a href="#1-stufe---seltsame-e-mail" class="hanchor" ariaLabel="Anchor">#</a> </h2>
+<p>Der Benutzer hat diese Mail bekommen:
+<img alt="E-Mail mit HTML anhang" src="/img/blog/2023-08-28-email.png">
+Die meisten Benutzer werden diesen Anhang vermutlich öffnen, da sie nichts verwerfliches daran sehen.</p>
+<h2 id="2stufe---download-der-datei-aus-dem-browser">2.Stufe - Download der Datei aus dem Browser<a href="#2stufe---download-der-datei-aus-dem-browser" class="hanchor" ariaLabel="Anchor">#</a> </h2>
+<p>Das öffnen der Datei führt dann zu dieser Seite:
+<img alt="&ldquo;Secure File&rdquo; Portal" src="/img/blog/2023-08-28-securefileportal.png">
+In diesem Beispiel ist die HTML-Seite bewusst sehr einfach gehalten und nicht obfuscated oder anderweitig
+modifiziert. Auf dieser Seite könnten ggf. auch Instruktionen zum weiteren Verfahren sein.</p>
+<h2 id="3a-stufe---entblocken">3.a Stufe - Entblocken<a href="#3a-stufe---entblocken" class="hanchor" ariaLabel="Anchor">#</a> </h2>
+<p>Wenn das Attachment auf einem Windows-Computer geöffnet wurde und ein Microsoft Office-Dokument ist, muss - je nach
+Zonen-Einstellungen - die Datei &ldquo;Entblockt&rdquo; werden. Dies kann allerdings dann mit einem Mark-Of-The-Web-Bypass
+umgangen werden. Hierfür können die Dateien z.B. in einem Archiv oder Filesystem-Container untergebracht werden,
+der kein NTFS beherrscht (etwa ISO 9660), oder über einen weniger offensichtlichen Loader geöffnet werden.
+Unter Linux/UNIX-Systemen muss hier in der Regel das Execute-Bit auf der Datei gesetzt werden, sofern die Datei
+ausführbar sein soll.</p>
+<h2 id="3b---dateien-sind-lokal-auf-dem-computer">3.b - Dateien sind lokal auf dem Computer<a href="#3b---dateien-sind-lokal-auf-dem-computer" class="hanchor" ariaLabel="Anchor">#</a> </h2>
+<p>Bei Dateitypen, die keiner so starken Absicherung unterliegen, oder bei Systemen, die dieses Prinzip der Absicherung
+nicht nutzen, steht die Datei im vollen Umfang zur Verfügung. Wird der Benutzer jetzt dazu angeleitet, die Warnung
+gegen das Ausführen von aus dem Internet heruntergeladenen Dateien zu ignorieren (oder diese wird umgangen), kann
+Schadcode ausgeführt werden. Da die Datei auf dem Rechner selbst generiert wird und nicht aus dem Internet kommt,
+greifen auch viele Antivirus/EDR-Tools nicht unbedingt ein.</p>
+<h2 id="4-stufe---exploitation">4. Stufe - Exploitation<a href="#4-stufe---exploitation" class="hanchor" ariaLabel="Anchor">#</a> </h2>
+<p>Nachdem die Malware an den Netzwerk - und manchen Endpoint - angekommen ist und optimalerweise vom Anwender
+ausgeführt wurde, kann der Computer übernommen werden und sich weiter im Netzwerk verbreitet werden.</p>
+<h2 id="wie-funktioniert-es">Wie funktioniert es?<a href="#wie-funktioniert-es" class="hanchor" ariaLabel="Anchor">#</a> </h2>
+<p>Web- und Emailfilter (Proxy, Gateway, File inspection etc.) führen in der Regel keine dynamische Analyse von Dateien
+(e-Mail-Anhängen, heruntergeladene Dateien o.ä.) durch. Daher ist es möglich, Dateien in einem eigentlich harmlosen
+und auch oft verwendeten Dateiformat (z.B. HTML) an diesen Sicherheitsmaßnahmen vorbeizuschleusen.
+Beispieldateien finden sich <a href="https://cloud.jmbit.de/s/AJ6wW32dc5qfGd6">Hier</a>, das Projekt zur Erstellung von solchen
+Dateien findet sich <a href="https://codeberg.org/jmbit/trojantool">Hier</a></p>
+<h2 id="was-kann-man-dagegen-tun">Was kann man dagegen tun?<a href="#was-kann-man-dagegen-tun" class="hanchor" ariaLabel="Anchor">#</a> </h2>
+<p>Das wichtigste Mittel gegen solche Angriffe ist, sich weniger auf statische Attribute zu verlassen, sondern mehr auf
+Verhalten. Es gibt Verhaltensmuster, die im Alltag extrem selten auftreten, aber in fast jedem Angriff in
+irgendeiner Form auftauchen. Das klassische Beispiel ist das Command <code>whoami</code> unter UNIX. ein alltäglicher Benutzer
+hat sehr selten Bedarf daran, anzuzeigen, welcher User er gerade ist. normalerweise steht dieser als teil des Prompt
+in der Konsole, oder ist anderweitig indiziert (z.B. $/# als teil des Prompt etc).</p>
+<hr>
+<h2 id="weitere-informationen">Weitere Informationen<a href="#weitere-informationen" class="hanchor" ariaLabel="Anchor">#</a> </h2>
+<p>Kurz nachdem ich diesen Blogpost veröffentlicht habe, wurde von DFIR ein Report über dieses Verfahren &ldquo;in der freien
+Wildbahn&rdquo; gepostet: <a href="https://thedfirreport.com/2023/08/28/html-smuggling-leads-to-domain-wide-ransomware/">HTML Smuggling Leads to Domain Wide
+Ransomware</a></p>
+<p>MITRE-Seite zu diesem Verfahren:  <a href="https://attack.mitre.org/techniques/T1027/006/">HTML Smuggling</a></p>
+<!-- raw HTML omitted -->
+
+      </div></div>
+
+  
+    
+<div class="pagination">
+  <div class="pagination__title">
+    <span class="pagination__title-h">Weitere Artikel</span>
+    <hr />
+  </div>
+  <div class="pagination__buttons">
+    
+      <a href="https://www.jmbit.de/blog/2023-11-30-capev2-sandbox/" class="button inline prev">
+        CAPEv2 Sandbox Teil 1
+      </a>
+    
+    
+      ::
+    
+    
+      <a href="https://www.jmbit.de/blog/2023-04-28-jsrat/" class="button inline next">
+        JScript delivered RAT
+      </a>
+    
+  </div>
+</div>
+
+
+  
+
+  
+    
+
+  
+</article>
+
+  </div>
+
+  
+    <footer class="footer">
+  <div class="footer__inner">
+    
+      <div class="copyright">
+        <span>© 2026 Johannes Bülow :: Powered by <a href="http://gohugo.io">Hugo</a></span>
+        <span> :: Theme made by <a href="https://twitter.com/panr">panr</a></span>
+        <span> :: <a href="/impressum/index.html">Impressum</a></span>
+    
+      <span>:: <a href="https://github.com/panr/hugo-theme-terminal" target="_blank">Theme</a> made by <a href="https://github.com/panr" target="_blank">panr</a></span>
+      </div>
+  </div>
+</footer>
+
+
+
+
+
+
+<script type="text/javascript" src="/bundle.min.js"></script>
+
+
+
+
+
+  
+</div>
+
+</body>
+</html>

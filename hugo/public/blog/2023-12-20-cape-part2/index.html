@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  
+    <title>CAPEv2 Sandbox Teil 2: Einrichtung der VM(s) :: </title>
+  
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Nach der Installation der Sandbox-Umgebung an sich kann man an die Erstellung und Installation der VMs gehen. Hier werde ich als Beispiel die Installation einer Windows 7 64bit-VM inkl. Microsoft Office 2010 (32bit) durchführen. Letztendlich gibt es jedoch keinen großen Unterschied zwischen den unterstützten Gast-Betriebssystemen (Windows 7&#43;, MacOS oder diverse Linux-Distributionen), es ist jedoch je nach Platform mehr oder weniger Aufwand (Bei Windows 10&#43; muss Defender komplett deaktiviert werden und es empfiehlt sich den Großteil der Bloatware zu deinstallieren um die Hardwareanforderungen zu verringern)." />
+<meta name="keywords" content="linux, it, consulting, security, hosting, development, jmbit, johannes bülow" />
+
+  <meta name="robots" content="noodp" />
+
+<link rel="canonical" href="https://www.jmbit.de/blog/2023-12-20-cape-part2/" />
+
+
+  
+
+
+
+
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/buttons.min.2bc533403a27dfe0e93105a92502b42ce4587e2e4a87d9f7d349e51e16e09478.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/code.min.00125962708925857e7b66dbc58391d55be1191a3d0ce2034de8c9cd2c481c36.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/fonts.min.4881f0c525f3ce2a1864fb6e96676396cebe1e6fcef1933e8e1dde7041004fb5.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/footer.min.2e3eb191baee58dd05a9f0104ac1fab0827bca7c64dafe0b2579f934c33a1d69.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/gist.min.a751e8b0abe1ba8bc53ced52a38b19d8950fe78ca29454ea8c2595cf26aad5c0.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/header.min.b6fb4423cf82a9f9d7abc9cd010223fa3d70a6526a3f28f8e17d814c06e18f9e.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/main.min.fe8dc560fccb53a458b0db19ccb7b265764ac46b68596b7e099c6793054dd457.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/menu.min.83637a90d903026bc280d3f82f96ceb06c5fc72b7c1a8d686afb5bbf818a29f7.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/pagination.min.82f6400eae7c7c6dc3c866733c2ec0579e4089608fea69400ff85b3880aa0d3c.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/post.min.fc74ca360273c1d828da3c02b8174eba435607b369d98418ccc6f2243cd4e75d.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/prism.min.9023bbc24533d09e97a51a0a42a5a7bfe4c591ae167c5551fb1d2191d11977c0.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/syntax.min.cc789ed9377260d7949ea4c18781fc58959a89287210fe4edbff44ebfc1511b6.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/terminal.min.dd0bf9c7cacb24c1b0184f52f1869b274e06689557468cc7030ccf632328eb97.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/terms.min.b81791663c3790e738e571cdbf802312390d30e4b1d8dc9d814a5b5454d0ac11.css">
+
+
+<link rel="stylesheet" href="https://www.jmbit.de/terminal.css">
+
+
+
+
+<link rel="shortcut icon" href="https://www.jmbit.de/favicon.png">
+<link rel="apple-touch-icon" href="https://www.jmbit.de/apple-touch-icon.png">
+
+
+<meta name="twitter:card" content="summary" />
+
+
+
+<meta property="og:locale" content="de" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="CAPEv2 Sandbox Teil 2: Einrichtung der VM(s)">
+<meta property="og:description" content="Nach der Installation der Sandbox-Umgebung an sich kann man an die Erstellung und Installation der VMs gehen. Hier werde ich als Beispiel die Installation einer Windows 7 64bit-VM inkl. Microsoft Office 2010 (32bit) durchführen. Letztendlich gibt es jedoch keinen großen Unterschied zwischen den unterstützten Gast-Betriebssystemen (Windows 7&#43;, MacOS oder diverse Linux-Distributionen), es ist jedoch je nach Platform mehr oder weniger Aufwand (Bei Windows 10&#43; muss Defender komplett deaktiviert werden und es empfiehlt sich den Großteil der Bloatware zu deinstallieren um die Hardwareanforderungen zu verringern)." />
+<meta property="og:url" content="https://www.jmbit.de/blog/2023-12-20-cape-part2/" />
+<meta property="og:site_name" content="" />
+
+  <meta property="og:image" content="https://www.jmbit.de/og-image.png">
+
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="627">
+
+
+  <meta property="article:published_time" content="2023-12-20 14:41:12 &#43;0100 CET" />
+
+
+
+
+
+
+
+
+
+
+
+
+</head>
+<body>
+
+
+<div class="container center">
+
+  <header class="header">
+  <div class="header__inner">
+    <div class="header__logo">
+      <a href="/">
+  <div class="logo">
+    JMB IT
+  </div>
+</a>
+
+    </div>
+    
+      <ul class="menu menu--mobile">
+  <li class="menu__trigger">Menu&nbsp;▾</li>
+  <li>
+    <ul class="menu__dropdown">
+      
+        
+          <li><a href="/blog/">Blog</a></li>
+        
+      
+        
+          <li><a href="/about/">Über mich</a></li>
+        
+      
+      
+    </ul>
+  </li>
+</ul>
+
+    
+    
+  </div>
+  
+    <nav class="navigation-menu">
+  <ul class="navigation-menu__inner menu--desktop">
+    
+      
+        
+          <li><a href="/blog/" >Blog</a></li>
+        
+      
+        
+          <li><a href="/about/" >Über mich</a></li>
+        
+      
+      
+    
+  </ul>
+</nav>
+
+  
+</header>
+
+
+  <div class="content">
+    
+<article class="post">
+  <h1 class="post-title">
+    <a href="https://www.jmbit.de/blog/2023-12-20-cape-part2/">CAPEv2 Sandbox Teil 2: Einrichtung der VM(s)</a>
+  </h1>
+  <div class="post-meta"><time class="post-date">2023-12-20</time></div>
+
+  
+  
+
+
+  
+
+  <div class="post-content"><div>
+        <p>Nach der Installation der Sandbox-Umgebung an sich kann man an die Erstellung und Installation der VMs gehen.
+Hier werde ich als Beispiel die Installation einer Windows 7 64bit-VM inkl. Microsoft Office 2010 (32bit) durchführen.
+Letztendlich gibt es jedoch keinen großen Unterschied zwischen den unterstützten Gast-Betriebssystemen (Windows 7+,
+MacOS oder diverse Linux-Distributionen), es ist jedoch je nach Platform mehr oder weniger Aufwand (Bei Windows 10+
+muss Defender komplett deaktiviert werden und es empfiehlt sich den Großteil der Bloatware zu deinstallieren um die
+Hardwareanforderungen zu verringern).</p>
+<p>Hier ist ein Beispiel der Software, die ich auf meine Windows 7-VM installiere. Der Einfachheit halber packe ich die
+Dateien alle zusammen in eine ISO-Datei (mithilfe von mkisofs), die ich dann an die VM anhängen kann. Ebenfalls
+interessant ist es, wenn man zusätzlich zu Software auch Dokumente und Bilder auf der VM ablegt, um eventuelles
+Ransomware-Verhalten besser beobachten zu können. Das Skript <code>disable_win7noise.bat</code> wird mit CAPEv2 ausgeliefert.</p>
+<pre tabindex="0"><code>~ $ ls isos/win7cuckoo 
+7z2301-x64.exe               OpenJDK8U-jre_x64_windows_hotspot_8u392b08.msi  windows6.1-kb2533552-x64_0ba5ac38d4e1c9588a1e53ad390d23c1e4ecd04d.msu
+agent.py                     python-3.8.10.exe                               windows6.1-kb2533623-x64.msu
+disable_win7noise.bat        VC_redist.x64.exe                               windows6.1-kb976932-x64_74865ef2562006e51d7f9333b4a8d45b7a749dab.exe
+ndp48-x86-x64-allos-enu.exe  VC_redist.x86.exe                               Win_x64_576753_mini_installer.exe
+</code></pre><h2 id="einstellungen-im-betriebssystem">Einstellungen im Betriebssystem<a href="#einstellungen-im-betriebssystem" class="hanchor" ariaLabel="Anchor">#</a> </h2>
+<p>Aufgrund der Weise, wie CAPEv2 funktioniert, muss der VM eine statische IP-Addresse vergeben werden:</p>
+<p><img alt="Win7 statische IP vergeben" src="/img/blog/2023-cape/win7-static-ip.png"></p>
+<p>Diese IP-Addresse muss dann später in der <code>/opt/CAPEv2/conf/kvm.conf</code> eingetragen werden.
+Ebenfalls sollten UAC und die Windows Firewall deaktiviert werden:</p>
+<p><img alt="Windows 7 Control Panel deaktivierte Firewall" src="/img/blog/2023-cape/win7_firew.png">
+<img alt="Windows 7 Control Panel deaktivierte User Account Control" src="/img/blog/2023-cape/win7_uac.png"></p>
+<p>In der Regel setze ich die Auflösung der VM auch hoch, entweder auf 1280x768 oder 1920x1080. Für die Aktivierung von
+Windows 7 und Office 2010 muss leider - sofern man keinen KMS Server besitzt, den man diesen VMs aussetzen möchte - die
+Telefonische Aktivierung verwendet werden.</p>
+<p>Bei der Installation von Python und MS-Office ist es wichtig, die 32-Bit-Variante zu verwenden, da die 64Bit-Variante
+leider nicht mit allen Analyseverfahren kompatibel ist.</p>
+<h2 id="agent-installieren">Agent installieren<a href="#agent-installieren" class="hanchor" ariaLabel="Anchor">#</a> </h2>
+<p>Sobald Python installiert (am besten im PATH registrieren und für alle Benutzer installieren)
+ist sollte noch Pillow nachinstalliert werden:</p>
+<pre tabindex="0"><code>&gt; py -m pip install --upgrade pip
+&gt; py -m pip install Pillow==9.5.0
+</code></pre><p><code>agent.py</code> ist der Teil der Software, der in der VM mitläuft um die Aufgaben dort auszuführen. Dieser Datei gibt man
+unter Windows 7 einen Unauffälligen Namen und legt sie unter
+<code>C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp</code> ab, unter Linux lässt man sie entweder von systemd oder
+cron beim (re)boot starten. Unter Windows 10/11 muss die Datei an einem anderen Ort abgelegt werden und dann ein
+Scheduled Task erstellt werden, der dieses Skript beim Boot als Admin ausführt. Langfristig habe ich geplant, den Agent
+und seine Dependencies mit PyInstaller zusammenzufassen.</p>
+<p>Falls die Installation des Agents erfolgreich war, kann man nun auf port 8000 der VM einen JSON-String sehen:</p>
+<p><img alt="Terminal Fenster mit CURL und JSON-Antwort" src="/img/blog/2023-cape/win7-agent-json.png"></p>
+<h2 id="konfiguration-der-vm-in-virt-managerlibvirt">Konfiguration der VM in virt-manager/libvirt<a href="#konfiguration-der-vm-in-virt-managerlibvirt" class="hanchor" ariaLabel="Anchor">#</a> </h2>
+<p>Letztendlich ist noch zu empfehlen die Grafik auf VNC umzustellen von Spice und dadurch nicht mehr benötigte Geräte
+zu entfernen. Dabei muss jedoch ein teil des XML-Codes der VM bearbeitet werden.</p>
+<p><img alt="Displayart von SPICE auf VNC ändern" src="/img/blog/2023-cape/SPICE2VNC.png">
+<img alt="SPICE-Audio-Zeile löschen" src="/img/blog/2023-cape/SPICE-Audio.png">
+<em>hierfür muss ggf. in den Einstellungen von Virt-Manager der &ldquo;Advanced&rdquo;-Modus aktiviert werden.</em></p>
+<p>Diese Änderungen machen es möglich, später die Liveansicht im Webbrowser zu verwenden.</p>
+<p>Sobald die VM fertig konfiguriert ist und der Agent erreichbar ist, muss nur noch im laufenden Zustand ein Snapshot
+erstellt werden.</p>
+<h2 id="vm-in-cape-bekanntmachen">VM in CAPE bekanntmachen<a href="#vm-in-cape-bekanntmachen" class="hanchor" ariaLabel="Anchor">#</a> </h2>
+<p>Nun muss noch die <code>/opt/CAPEv2/conf/kvm.conf</code>-Datei angepasst werden. In diesem Fall müssen primär &ldquo;cuckoo1&rdquo; durch den
+Namen der VM ersetzt werden (z.B. win7) und die eingetragene IP-Adresse sowie das Netzwerk angepasst werden.
+In meinem Fall:
+- cuckoo1 &gt; win7
+- 192.168.122.105 &gt; 192.168.1.188
+- virbr0 &gt; virbr1
+Dazu müssen noch die Tags hinzugefügt werden, z.B. <code>tags = win7,msoffice2010</code>. Bei Windows-Maschinen muss (Wie in der
+Config-File beschrieben), einer der Tags <code>winxp,win7,win10,win11</code> hinzugefügt werden. Nun sollte CAPEv2 die VM kennen. Um
+dies zu testen, sollte man am besten das System noch einmal neu starten, oder alle CAPE-Dienste neu starten.</p>
+<p>Sollte der Dienst weiterhin nicht starten, kann man mit</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>sudo -u cape bash -c <span style="color:#e6db74">&#34;cd /opt/CAPEv2 &amp;&amp;poetry run python /opt/CAPEv2/cuckoo.py&#34;</span>
+</span></span></code></pre></div><p>versuchen, das Programm manuell zu starten und eventuelle Fehler zu debuggen. Hier wird einem auch angezeigt, welche
+Python-Pakete noch fehlen und ggf. nachinstalliert werden müssen. Dabei sollte beachtet werden, dass diese immer als
+<code>cape</code> im <code>/opt/CAPEv2/</code>-Verzeichnis ausgeführt werden müssen.</p>
+<pre tabindex="0"><code>root@cape:~# systemctl status cape
+● cape.service - CAPE
+     Loaded: loaded (/lib/systemd/system/cape.service; enabled; vendor preset: enabled)
+     Active: active (running) since Wed 2023-12-27 17:23:29 UTC; 4s ago
+       Docs: https://github.com/kevoreilly/CAPEv2
+   Main PID: 3515 (python)
+      Tasks: 1 (limit: 38183)
+     Memory: 99.4M
+        CPU: 4.149s
+     CGroup: /system.slice/cape.service
+             └─3515 /home/cape/.cache/pypoetry/virtualenvs/capev2-t2x27zRb-py3.10/bin/python cuckoo&gt;
+</code></pre><h2 id="reporting-konfiguration">Reporting-Konfiguration<a href="#reporting-konfiguration" class="hanchor" ariaLabel="Anchor">#</a> </h2>
+<p>In der Datei <code>/opt/CAPEv2/conf/reporting.conf</code> muss zumindest das Reporting nach MongoDB oder Elasticsearch aktiviert
+werden, andere Reports können aber ebenfalls aktiviert werden (z.B. PDF-Reports, die einfach weiterzugeben sind).
+Nach dieser Änderung muss noch einmal der <code>cape</code>-Dienst neu gestartet werden (<code>systemctl restart cape</code>).</p>
+<h2 id="cape-web-ui">CAPE-Web-UI<a href="#cape-web-ui" class="hanchor" ariaLabel="Anchor">#</a> </h2>
+<p>Nun sollte hoffentlich die Web-UI erreichbar sein und funktionieren:</p>
+<p><img alt="CAPEv2 Dashboard" src="/img/blog/2023-cape/cape_dashboard.png"></p>
+<p>Jetzt kann man unter &ldquo;Submit&rdquo; eine Testdatei hochladen, die analysiert werden soll.
+Dann heißt es nur noch warten und hoffen, dass der Report erfolgreich generiert wird und keine Fehler geworfen werden.</p>
+
+      </div></div>
+
+  
+    
+<div class="pagination">
+  <div class="pagination__title">
+    <span class="pagination__title-h">Weitere Artikel</span>
+    <hr />
+  </div>
+  <div class="pagination__buttons">
+    
+      <a href="https://www.jmbit.de/blog/2024-03-16-babelfish-psql/" class="button inline prev">
+        Babelfish für Postgresql - MSSQL-Kompatibilität für Postgres
+      </a>
+    
+    
+      ::
+    
+    
+      <a href="https://www.jmbit.de/blog/2023-11-30-capev2-sandbox/" class="button inline next">
+        CAPEv2 Sandbox Teil 1
+      </a>
+    
+  </div>
+</div>
+
+
+  
+
+  
+    
+
+  
+</article>
+
+  </div>
+
+  
+    <footer class="footer">
+  <div class="footer__inner">
+    
+      <div class="copyright">
+        <span>© 2026 Johannes Bülow :: Powered by <a href="http://gohugo.io">Hugo</a></span>
+        <span> :: Theme made by <a href="https://twitter.com/panr">panr</a></span>
+        <span> :: <a href="/impressum/index.html">Impressum</a></span>
+    
+      <span>:: <a href="https://github.com/panr/hugo-theme-terminal" target="_blank">Theme</a> made by <a href="https://github.com/panr" target="_blank">panr</a></span>
+      </div>
+  </div>
+</footer>
+
+
+
+
+
+
+<script type="text/javascript" src="/bundle.min.js"></script>
+
+
+
+
+
+  
+</div>
+
+</body>
+</html>

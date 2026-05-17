@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  
+    <title>ESXiArgs :: </title>
+  
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="UPDATE Mittlerweile ist eine neue Variante im Umlauf, die vmdks unwiederruflich verschlüsselt! ESXiArgs ist eine vermutlich neue Ransomware-Familie, die ESXi-Server angreift und darauf laufende VMs (teilweise) verschlüsselt. Der wahrscheinlichste Angriffsvektor ist derzeit CVE-2021-21974, ein Heap-Overflow -&amp;gt; RCE Exploit. Benannt ist die Malware danach, dass sie dem Namen verschlüsselter Dateien &amp;ldquo;.args&amp;rdquo; anhängt.
+Laut ONYPHE sind 2,112 IPs kompromittiert (Stand 5.2.2023):
+Was ist passiert? Auf den betroffenen ESXi-Servern wurde vermutlich unter Ausnutzung von CVE-2021-21974 eine reverse shell installiert." />
+<meta name="keywords" content="linux, it, consulting, security, hosting, development, jmbit, johannes bülow" />
+
+  <meta name="robots" content="noodp" />
+
+<link rel="canonical" href="https://www.jmbit.de/blog/2023-02-05-esxiargs/" />
+
+
+  
+
+
+
+
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/buttons.min.2bc533403a27dfe0e93105a92502b42ce4587e2e4a87d9f7d349e51e16e09478.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/code.min.00125962708925857e7b66dbc58391d55be1191a3d0ce2034de8c9cd2c481c36.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/fonts.min.4881f0c525f3ce2a1864fb6e96676396cebe1e6fcef1933e8e1dde7041004fb5.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/footer.min.2e3eb191baee58dd05a9f0104ac1fab0827bca7c64dafe0b2579f934c33a1d69.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/gist.min.a751e8b0abe1ba8bc53ced52a38b19d8950fe78ca29454ea8c2595cf26aad5c0.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/header.min.b6fb4423cf82a9f9d7abc9cd010223fa3d70a6526a3f28f8e17d814c06e18f9e.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/main.min.fe8dc560fccb53a458b0db19ccb7b265764ac46b68596b7e099c6793054dd457.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/menu.min.83637a90d903026bc280d3f82f96ceb06c5fc72b7c1a8d686afb5bbf818a29f7.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/pagination.min.82f6400eae7c7c6dc3c866733c2ec0579e4089608fea69400ff85b3880aa0d3c.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/post.min.fc74ca360273c1d828da3c02b8174eba435607b369d98418ccc6f2243cd4e75d.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/prism.min.9023bbc24533d09e97a51a0a42a5a7bfe4c591ae167c5551fb1d2191d11977c0.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/syntax.min.cc789ed9377260d7949ea4c18781fc58959a89287210fe4edbff44ebfc1511b6.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/terminal.min.dd0bf9c7cacb24c1b0184f52f1869b274e06689557468cc7030ccf632328eb97.css">
+
+  
+  <link rel="stylesheet" href="https://www.jmbit.de/css/terms.min.b81791663c3790e738e571cdbf802312390d30e4b1d8dc9d814a5b5454d0ac11.css">
+
+
+<link rel="stylesheet" href="https://www.jmbit.de/terminal.css">
+
+
+
+
+<link rel="shortcut icon" href="https://www.jmbit.de/favicon.png">
+<link rel="apple-touch-icon" href="https://www.jmbit.de/apple-touch-icon.png">
+
+
+<meta name="twitter:card" content="summary" />
+
+
+
+<meta property="og:locale" content="de" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="ESXiArgs">
+<meta property="og:description" content="UPDATE Mittlerweile ist eine neue Variante im Umlauf, die vmdks unwiederruflich verschlüsselt! ESXiArgs ist eine vermutlich neue Ransomware-Familie, die ESXi-Server angreift und darauf laufende VMs (teilweise) verschlüsselt. Der wahrscheinlichste Angriffsvektor ist derzeit CVE-2021-21974, ein Heap-Overflow -&amp;gt; RCE Exploit. Benannt ist die Malware danach, dass sie dem Namen verschlüsselter Dateien &amp;ldquo;.args&amp;rdquo; anhängt.
+Laut ONYPHE sind 2,112 IPs kompromittiert (Stand 5.2.2023):
+Was ist passiert? Auf den betroffenen ESXi-Servern wurde vermutlich unter Ausnutzung von CVE-2021-21974 eine reverse shell installiert." />
+<meta property="og:url" content="https://www.jmbit.de/blog/2023-02-05-esxiargs/" />
+<meta property="og:site_name" content="" />
+
+  <meta property="og:image" content="https://www.jmbit.de/og-image.png">
+
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="627">
+
+
+  <meta property="article:published_time" content="2023-02-05 14:36:45 &#43;0100 CET" />
+
+
+
+
+
+
+
+
+
+
+
+
+</head>
+<body>
+
+
+<div class="container center">
+
+  <header class="header">
+  <div class="header__inner">
+    <div class="header__logo">
+      <a href="/">
+  <div class="logo">
+    JMB IT
+  </div>
+</a>
+
+    </div>
+    
+      <ul class="menu menu--mobile">
+  <li class="menu__trigger">Menu&nbsp;▾</li>
+  <li>
+    <ul class="menu__dropdown">
+      
+        
+          <li><a href="/blog/">Blog</a></li>
+        
+      
+        
+          <li><a href="/about/">Über mich</a></li>
+        
+      
+      
+    </ul>
+  </li>
+</ul>
+
+    
+    
+  </div>
+  
+    <nav class="navigation-menu">
+  <ul class="navigation-menu__inner menu--desktop">
+    
+      
+        
+          <li><a href="/blog/" >Blog</a></li>
+        
+      
+        
+          <li><a href="/about/" >Über mich</a></li>
+        
+      
+      
+    
+  </ul>
+</nav>
+
+  
+</header>
+
+
+  <div class="content">
+    
+<article class="post">
+  <h1 class="post-title">
+    <a href="https://www.jmbit.de/blog/2023-02-05-esxiargs/">ESXiArgs</a>
+  </h1>
+  <div class="post-meta"><time class="post-date">2023-02-05</time><span class="post-author">Johannes Bülow</span></div>
+
+  
+  
+
+
+  
+
+  <div class="post-content"><div>
+        <table>
+<thead>
+<tr>
+<th>UPDATE</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Mittlerweile ist eine neue Variante im Umlauf, die vmdks unwiederruflich verschlüsselt!</td>
+</tr>
+</tbody>
+</table>
+<p>ESXiArgs ist eine vermutlich neue Ransomware-Familie, die ESXi-Server angreift und darauf laufende VMs (teilweise)
+verschlüsselt. Der wahrscheinlichste Angriffsvektor ist derzeit
+<a href="https://www.vmware.com/security/advisories/VMSA-2021-0002.html">CVE-2021-21974</a>, ein Heap-Overflow -&gt; RCE Exploit.
+Benannt ist die Malware danach, dass sie dem Namen verschlüsselter Dateien &ldquo;.args&rdquo; anhängt.</p>
+<p>Laut ONYPHE sind 2,112 IPs kompromittiert (Stand 5.2.2023):</p>
+<p><a href="https://twitter.com/onyphe/status/1622272331421736962"><img alt="Tweet von Onyphe zu kompromittierten Hosts" src="/img/blog/esxiargs_onyphe.jpg"></a></p>
+<h2 id="was-ist-passiert">Was ist passiert?<a href="#was-ist-passiert" class="hanchor" ariaLabel="Anchor">#</a> </h2>
+<p>Auf den betroffenen ESXi-Servern wurde vermutlich unter Ausnutzung von CVE-2021-21974 eine reverse shell installiert.
+In dem <a href="https://bazaar.abuse.ch/sample/773d147a031d8ef06ee8ec20b614a4fd9733668efeb2b05aa03e36baaf082878/#yara">Sample</a>
+der Backdoor, das ich analysiert habe, wurde auf port 8008 eine Webshell gestartet:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>HTTPServer((<span style="color:#e6db74">&#39;127.0.0.1&#39;</span>, <span style="color:#ae81ff">8008</span>), PostServer)<span style="color:#f92672">.</span>serve_forever()
+</span></span></code></pre></div><p>Ich habe leider nur die python-Datei selbst, da das Skript, das die VMs verschlüsselt, jedoch die Datei
+<code>/etc/rc.local.d/local.sh</code> leert, ist anzunehmen, dass das Python-Skript selbst von dort aufgerufen wird, also bei jedem
+reboot neu geladen wird.</p>
+<p>Diese Reverse-Shell wurde dann verwendet, um mehrere Dateien unter /tmp/ abzulegen und dann die darunter befindliche
+<code>compromise.sh</code> auszuführen. Dieses Shellscript verschlüsselt alle Dateien, deren Namen auf &ldquo;*.vmdk&rdquo;, &ldquo;*.vmx&rdquo;, &ldquo;*.vmxf&rdquo;,
+&ldquo;*.vmsd&rdquo;, &ldquo;*.vmsn&rdquo;, &ldquo;*.vswp&rdquo;, &ldquo;*.vmss&rdquo;, &ldquo;*.nvram&rdquo; oder &ldquo;*.vmem&rdquo; enden, und die kleiner als 128MB sind. Bei
+Dateien, die größer als 128MB sind, werden nur 100 1MB-Blöcke in der Datei verschlüsselt. Dies bedeutet, dass die VMs
+selbst in der Regel relativ einfach wiederherstellbar sind. Am Ende dieses Artikels werde ich in der Linksammlung einige
+Anleitungen verlinken. Sollten Sie dabei Probleme haben, können Sie auch gerne <a href="/about/">auf mich zukommen</a>.</p>
+<h2 id="woran-kann-ich-einen-befall-erkennen">Woran kann ich einen Befall erkennen?<a href="#woran-kann-ich-einen-befall-erkennen" class="hanchor" ariaLabel="Anchor">#</a> </h2>
+<p>Sollte das Virus bereits ausgeführt worden sein, sehen Sie auf Port 443 des Servers statt der gewohnten Web-UI diese
+Website:</p>
+<p><img alt="Ransom Note" src="/img/blog/esxiargs-ransomnote.jpg"></p>
+<p>Die Backdoor, die vermutlich für die Infektion verwendet wird/wurde, läuft als Python Webserver. In diesem Fall lief er auf
+Port 8008, es wäre aber auch so ziemlich jeder andere Port denkbar. Mit <code>esxcli network ip connection list</code> können Sie
+sich auf dem ESXi-Server anzeigen, welche Netzwerkdienste aktuell laufen. Ebenso sollte in /etc/rc.local.d/ ein Eintrag
+zu finden sein, der das Python-Script startet. Das Skript selbst dürfte <code>store/packages/vmtools.py</code> heißen.</p>
+<h2 id="welche-voraussetzungen-für-einen-befall-gibt-es">Welche Voraussetzungen für einen Befall gibt es?<a href="#welche-voraussetzungen-für-einen-befall-gibt-es" class="hanchor" ariaLabel="Anchor">#</a> </h2>
+<p>Der ESXi-Server muss, damit CVE-2021-21974 ausgenutzt werden kann, auf Port 427 aus dem Internet erreichbar sein, sowie
+auf einer Version vor ESXi70U1c-17325551 (ESXi 7.0), ESXi670-202102401-SG (ESXi 6.7) oder ESXi650-202102101-SG (ESXi 6.5)
+sein. Da diese Malware aber eine bereits deployte Hintertür ausnutzt, reicht es, wenn diese Konstellation in der
+Vergangenheit existiert hat, um kompromittiert werden zu können (Gesetzt, die Hintertür ist weiterhin aus dem Internet
+erreichbar)</p>
+<hr>
+<h2 id="linksammlung">Linksammlung<a href="#linksammlung" class="hanchor" ariaLabel="Anchor">#</a> </h2>
+<h3 id="quellen-und-weiterführendes">Quellen und Weiterführendes:<a href="#quellen-und-weiterführendes" class="hanchor" ariaLabel="Anchor">#</a> </h3>
+<p><a href="https://www.bleepingcomputer.com/news/security/massive-esxiargs-ransomware-attack-targets-vmware-esxi-servers-worldwide/">https://www.bleepingcomputer.com/news/security/massive-esxiargs-ransomware-attack-targets-vmware-esxi-servers-worldwide/</a>
+<a href="https://blogs.juniper.net/en-us/threat-research/a-custom-python-backdoor-for-vmware-esxi-servers">https://blogs.juniper.net/en-us/threat-research/a-custom-python-backdoor-for-vmware-esxi-servers</a></p>
+<h3 id="mögliche-anleitungen--ansätze">Mögliche Anleitungen / Ansätze<a href="#mögliche-anleitungen--ansätze" class="hanchor" ariaLabel="Anchor">#</a> </h3>
+<p><strong>Ich übernehme KEINE Verantwortung dafür, ob diese Anleitungen funktionieren.</strong> Ich habe Online sowohl von Erfolgen als
+auch Fehlschlägen gelesen. Ich empfehle Ihnen, sich bei wichtigen Daten an Experten zu wenden und die Wiederherstellung
+nicht selbst zu versuchen.
+<a href="https://enes.dev/">https://enes.dev/</a>
+<a href="https://www.bleepingcomputer.com/forums/t/782193/esxi-ransomware-help-and-support-topic-esxiargs-args-extension/?p=5470599">https://www.bleepingcomputer.com/forums/t/782193/esxi-ransomware-help-and-support-topic-esxiargs-args-extension/?p=5470599</a>
+<a href="https://www.bleepingcomputer.com/forums/t/782193/esxi-ransomware-help-and-support-topic-esxiargs-args-extension/?p=5470896">https://www.bleepingcomputer.com/forums/t/782193/esxi-ransomware-help-and-support-topic-esxiargs-args-extension/?p=5470896</a>
+<a href="https://kb.vmware.com/s/article/1026353">https://kb.vmware.com/s/article/1026353</a></p>
+<h3 id="betroffene-esxi-server">Betroffene ESXi-Server<a href="#betroffene-esxi-server" class="hanchor" ariaLabel="Anchor">#</a> </h3>
+<p><a href="https://www.shodan.io/search?query=html%3A%22TOX_ID%22">https://www.shodan.io/search?query=html%3A%22TOX_ID%22</a>
+<a href="https://twitter.com/onyphe/status/1622272331421736962">https://twitter.com/onyphe/status/1622272331421736962</a></p>
+
+      </div></div>
+
+  
+    
+<div class="pagination">
+  <div class="pagination__title">
+    <span class="pagination__title-h">Weitere Artikel</span>
+    <hr />
+  </div>
+  <div class="pagination__buttons">
+    
+      <a href="https://www.jmbit.de/blog/2023-04-28-jsrat/" class="button inline prev">
+        JScript delivered RAT
+      </a>
+    
+    
+      ::
+    
+    
+      <a href="https://www.jmbit.de/blog/2023-01-27-securing-firefox/" class="button inline next">
+        Firefox absichern
+      </a>
+    
+  </div>
+</div>
+
+
+  
+
+  
+    
+
+  
+</article>
+
+  </div>
+
+  
+    <footer class="footer">
+  <div class="footer__inner">
+    
+      <div class="copyright">
+        <span>© 2026 Johannes Bülow :: Powered by <a href="http://gohugo.io">Hugo</a></span>
+        <span> :: Theme made by <a href="https://twitter.com/panr">panr</a></span>
+        <span> :: <a href="/impressum/index.html">Impressum</a></span>
+    
+      <span>:: <a href="https://github.com/panr/hugo-theme-terminal" target="_blank">Theme</a> made by <a href="https://github.com/panr" target="_blank">panr</a></span>
+      </div>
+  </div>
+</footer>
+
+
+
+
+
+
+<script type="text/javascript" src="/bundle.min.js"></script>
+
+
+
+
+
+  
+</div>
+
+</body>
+</html>

