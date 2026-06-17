@@ -5,7 +5,7 @@ on:
 
 jobs:
   docker:
-    runs-on: node
+    runs-on: docker
     steps:
       -
         name: Checkout code
