@@ -16,7 +16,7 @@ jobs:
         with:
           registry: git.jmbit.de
           username: ${{ forgejo.repository_owner }}
-          password: ${{ forgejo.token }}
+          password: ${{ secrets.actions_packages }}
       -
         name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
